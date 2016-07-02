@@ -3,7 +3,7 @@ package cc.vileda.kalfor;
 import io.vertx.rxjava.core.buffer.Buffer;
 
 
-public class Context
+class Context
 {
 		public final String name;
 		public final String path;

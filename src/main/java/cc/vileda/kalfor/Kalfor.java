@@ -11,7 +11,7 @@ import java.net.MalformedURLException;
 
 public class Kalfor
 {
-		final static Logger LOGGER = LoggerFactory.getLogger(Kalfor.class);
+		private final static Logger LOGGER = LoggerFactory.getLogger(Kalfor.class);
 		private final Endpoint endpoint;
 
 		public Kalfor(final String url) throws MalformedURLException

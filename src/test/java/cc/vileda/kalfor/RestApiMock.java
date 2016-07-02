@@ -6,7 +6,7 @@ import io.vertx.rxjava.core.http.HttpServer;
 import io.vertx.rxjava.ext.web.Router;
 
 
-public class RestApiMock extends AbstractVerticle
+class RestApiMock extends AbstractVerticle
 {
 		private final int port;
 
