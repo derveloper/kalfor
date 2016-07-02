@@ -24,64 +24,68 @@ import static org.hamcrest.Matchers.containsString;
 @RunWith(VertxUnitRunner.class)
 public class CombineHandlerTest
 {
-		private final int kalforPort = getRandomPort();
-		private final int remotePort = getRandomPort();
+	static {
+		System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.Log4j2LogDelegateFactory");
+	}
 
-		public CombineHandlerTest() throws IOException {}
+	private final int kalforPort = getRandomPort();
+	private final int remotePort = getRandomPort();
 
-		@Before
-		public void setUp(TestContext context) throws IOException
-		{
-				final Vertx vertx = Vertx.vertx();
-				final Async async = context.async();
-				final Observable<String> deployVerticle = RxHelper.deployVerticle(vertx, new RestApiMock(remotePort));
-				final Observable<String> deployVerticle2 = RxHelper.deployVerticle(
-						vertx,
-						new KalforVerticle(new KalforOptions(new Endpoint("http://localhost:" + remotePort), kalforPort))
-				);
-				deployVerticle
-						.subscribe(s -> {
-								System.out.println(s);
-								deployVerticle2.subscribe(s1 -> {
-										System.out.println(s1);
-										async.complete();
-								});
-						});
-		}
+	public CombineHandlerTest() throws IOException {}
 
-		@Test
-		public void restApiMockShouldRespond()
-		{
-				get("http://localhost:"+remotePort+"/test")
-						.then()
-						.body(containsString(new JsonObject().put("foo", "bar").encodePrettily()));
-		}
+	private static int getRandomPort() throws IOException
+	{
+		ServerSocket socket = new ServerSocket(0);
+		int port = socket.getLocalPort();
+		socket.close();
 
-		@Test
-		public void combineHandlerShouldCombine()
-		{
-				final String given = new JsonArray(Arrays.asList(
-						new JsonObject().put("firstKey", "/test"),
-						new JsonObject().put("secondKey", "/test")
-				)).encodePrettily();
-				final String expected = new JsonObject()
-						.put("firstKey", new JsonObject().put("foo", "bar"))
-						.put("secondKey", new JsonObject().put("foo", "bar"))
-						.encodePrettily();
-				given()
-						.body(given)
-						.when()
-							.post("http://localhost:"+kalforPort+"/combine")
-						.then()
-							.body(containsString(expected));
-		}
+		return port;
+	}
 
-		private static int getRandomPort() throws IOException
-		{
-				ServerSocket socket = new ServerSocket(0);
-				int port = socket.getLocalPort();
-				socket.close();
+	@Before
+	public void setUp(TestContext context) throws IOException
+	{
+		final Vertx vertx = Vertx.vertx();
+		final Async async = context.async();
+		final Observable<String> deployVerticle = RxHelper.deployVerticle(vertx, new RestApiMock(remotePort));
+		final Observable<String> deployVerticle2 = RxHelper.deployVerticle(
+				vertx,
+				new KalforVerticle(new KalforOptions(new Endpoint("http://localhost:" + remotePort), kalforPort))
+		);
+		deployVerticle
+				.subscribe(s -> {
+					System.out.println(s);
+					deployVerticle2.subscribe(s1 -> {
+						System.out.println(s1);
+						async.complete();
+					});
+				});
+	}
 
-				return port;
-		}
+	@Test
+	public void restApiMockShouldRespond()
+	{
+		get("http://localhost:" + remotePort + "/test")
+				.then()
+				.body(containsString(new JsonObject().put("foo", "bar").encodePrettily()));
+	}
+
+	@Test
+	public void combineHandlerShouldCombine()
+	{
+		final String given = new JsonArray(Arrays.asList(
+				new JsonObject().put("firstKey", "/test"),
+				new JsonObject().put("secondKey", "/test")
+		)).encodePrettily();
+		final String expected = new JsonObject()
+				.put("firstKey", new JsonObject().put("foo", "bar"))
+				.put("secondKey", new JsonObject().put("foo", "bar"))
+				.encodePrettily();
+		given()
+				.body(given)
+				.when()
+				.post("http://localhost:" + kalforPort + "/combine")
+				.then()
+				.body(containsString(expected));
+	}
 }

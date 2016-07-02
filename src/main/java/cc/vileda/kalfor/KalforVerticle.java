@@ -10,41 +10,41 @@ import io.vertx.rxjava.ext.web.handler.CorsHandler;
 
 public class KalforVerticle extends AbstractVerticle
 {
-		private final KalforOptions kalforOptions;
-		private HttpServer httpServer;
+	private final KalforOptions kalforOptions;
+	private HttpServer httpServer;
 
-		public KalforVerticle(final KalforOptions kalforOptions)
-		{
-				this.kalforOptions = kalforOptions;
-		}
+	public KalforVerticle(final KalforOptions kalforOptions)
+	{
+		this.kalforOptions = kalforOptions;
+	}
 
-		@Override
-		public void start() throws Exception
-		{
-				httpServer = vertx.createHttpServer();
-				final HttpClient httpClient = createHttpClient();
+	@Override
+	public void start() throws Exception
+	{
+		httpServer = vertx.createHttpServer();
+		final HttpClient httpClient = createHttpClient();
 
-				final Router router = Router.router(vertx);
-				router.route().handler(CorsHandler.create("*").allowedHeader("authorization"));
+		final Router router = Router.router(vertx);
+		router.route().handler(CorsHandler.create("*").allowedHeader("authorization"));
 
-				router.post("/combine").handler(new CombineHandler(httpClient, kalforOptions.proxyHost));
-				router.get("/combine").handler(new CombineHandler(httpClient, kalforOptions.proxyHost));
+		router.post("/combine").handler(new CombineHandler(httpClient, kalforOptions.proxyHost));
+		router.get("/combine").handler(new CombineHandler(httpClient, kalforOptions.proxyHost));
 
-				httpServer.requestHandler(router::accept).listen(kalforOptions.listenPort);
-		}
+		httpServer.requestHandler(router::accept).listen(kalforOptions.listenPort);
+	}
 
-		private HttpClient createHttpClient()
-		{
-				final HttpClientOptions
-						httpClientOptions =
-						new HttpClientOptions().setDefaultHost(kalforOptions.proxyHost).setSsl(kalforOptions.ssl).setDefaultPort(kalforOptions.proxyPort);
+	private HttpClient createHttpClient()
+	{
+		final HttpClientOptions
+				httpClientOptions =
+				new HttpClientOptions().setDefaultHost(kalforOptions.proxyHost).setSsl(kalforOptions.ssl).setDefaultPort(kalforOptions.proxyPort);
 
-				return vertx.createHttpClient(httpClientOptions);
-		}
+		return vertx.createHttpClient(httpClientOptions);
+	}
 
-		@Override
-		public void stop() throws Exception
-		{
-				httpServer.close();
-		}
+	@Override
+	public void stop() throws Exception
+	{
+		httpServer.close();
+	}
 }
