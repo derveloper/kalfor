@@ -43,6 +43,34 @@ class CombineHandler implements Handler<RoutingContext>
 						.subscribe(entries -> response.end(entries.encodePrettily()));
 		}
 
+		private Func1<? super Map.Entry<String, String>, ? extends Observable<? extends Context>> makeRequest(HttpServerRequest request)
+		{
+				return pair -> {
+						final ObservableFuture<Context> observableFuture = new ObservableFuture<>();
+						final String name = pair.getKey();
+						final String path = pair.getValue();
+						final HttpClientRequest httpClientRequest = httpClient.get(path, handleClientResponse(observableFuture, name, path));
+
+						httpClientRequest.exceptionHandler(Throwable::printStackTrace);
+						request.headers().remove("Origin");
+						httpClientRequest.headers().addAll(request.headers());
+						httpClientRequest.putHeader("Connection", "close").putHeader("Host", proxyHost).end();
+						return observableFuture;
+				};
+		}
+
+		private Handler<HttpClientResponse> handleClientResponse(ObservableFuture<Context> observableFuture, String name, String path)
+		{
+				return httpClientResponse -> {
+						{
+								System.out.println(httpClientResponse.statusCode());
+								httpClientResponse.exceptionHandler(Throwable::printStackTrace);
+								httpClientResponse.bodyHandler(buffer -> observableFuture.toHandler()
+										.handle(io.vertx.core.Future.succeededFuture(new Context(name, path, buffer))));
+						}
+				};
+		}
+
 		private Observable<? extends Map.Entry<String, String>> transformRequest(Buffer buffer)
 		{
 				return Observable.from(buffer.toJsonArray()
@@ -68,36 +96,5 @@ class CombineHandler implements Handler<RoutingContext>
 				return body.trim().startsWith("{")
 						? entries.put(path, new JsonObject(body))
 						: entries;
-		}
-
-		private Func1<? super Map.Entry<String, String>, ? extends Observable<? extends Context>> makeRequest(HttpServerRequest request)
-		{
-				return pair -> {
-						final ObservableFuture<Context> observableFuture = new ObservableFuture<>();
-						final String name = pair.getKey();
-						final String path = pair.getValue();
-						final HttpClientRequest httpClientRequest = httpClient.get(path, handleClientResponse(observableFuture, name, path));
-
-						httpClientRequest.exceptionHandler(Throwable::printStackTrace);
-						request.headers().remove("Origin");
-						httpClientRequest.headers().addAll(request.headers());
-						httpClientRequest
-								.putHeader("Connection", "close")
-								.putHeader("Host", proxyHost)
-								.end();
-						return observableFuture;
-				};
-		}
-
-		private Handler<HttpClientResponse> handleClientResponse(ObservableFuture<Context> observableFuture, String name, String path)
-		{
-				return httpClientResponse -> {
-						{
-								System.out.println(httpClientResponse.statusCode());
-								httpClientResponse.exceptionHandler(Throwable::printStackTrace);
-								httpClientResponse.bodyHandler(buffer -> observableFuture.toHandler()
-										.handle(io.vertx.core.Future.succeededFuture(new Context(name, path, buffer))));
-						}
-				};
 		}
 }
