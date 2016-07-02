@@ -7,6 +7,7 @@ import io.vertx.rxjava.core.buffer.Buffer;
 import io.vertx.rxjava.core.http.*;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import rx.Observable;
+import rx.functions.Action1;
 import rx.functions.Func1;
 
 import java.util.AbstractMap;
@@ -40,7 +41,14 @@ class CombineHandler implements Handler<RoutingContext>
 						.reduce(new JsonObject(), this::aggregateResponse)
 						.doOnError(Throwable::printStackTrace)
 						.onErrorReturn(throwable -> new JsonObject())
-						.subscribe(entries -> response.end(entries.encodePrettily()));
+						.subscribe(sendResponse(request, response));
+		}
+
+		private Action1<JsonObject> sendResponse(final HttpServerRequest request, final HttpServerResponse response)
+		{
+				return entries -> response
+						.putHeader("content-type", request.getHeader("content-type"))
+						.end(entries.encodePrettily());
 		}
 
 		private Func1<? super Map.Entry<String, String>, ? extends Observable<? extends Context>> makeRequest(HttpServerRequest request)
@@ -54,7 +62,10 @@ class CombineHandler implements Handler<RoutingContext>
 						httpClientRequest.exceptionHandler(Throwable::printStackTrace);
 						request.headers().remove("Origin");
 						httpClientRequest.headers().addAll(request.headers());
-						httpClientRequest.putHeader("Connection", "close").putHeader("Host", proxyHost).end();
+						httpClientRequest
+								.putHeader("Connection", "close")
+								.putHeader("Host", proxyHost)
+								.end();
 						return observableFuture;
 				};
 		}
@@ -89,7 +100,7 @@ class CombineHandler implements Handler<RoutingContext>
 
 		private JsonObject aggregateResponse(final JsonObject entries, final Context context)
 		{
-				final String path = context.path;
+				final String path = context.name;
 				final String body = context.buffer.toString();
 				System.out.println(body);
 

@@ -11,6 +11,7 @@ import io.vertx.rxjava.ext.web.handler.CorsHandler;
 public class KalforVerticle extends AbstractVerticle
 {
 		private final KalforOptions kalforOptions;
+		private HttpServer httpServer;
 
 		public KalforVerticle(final KalforOptions kalforOptions)
 		{
@@ -20,7 +21,7 @@ public class KalforVerticle extends AbstractVerticle
 		@Override
 		public void start() throws Exception
 		{
-				final HttpServer httpServer = vertx.createHttpServer();
+				httpServer = vertx.createHttpServer();
 				final HttpClient httpClient = createHttpClient();
 
 				final Router router = Router.router(vertx);
@@ -39,5 +40,11 @@ public class KalforVerticle extends AbstractVerticle
 						new HttpClientOptions().setDefaultHost(kalforOptions.proxyHost).setSsl(kalforOptions.ssl).setDefaultPort(kalforOptions.proxyPort);
 
 				return vertx.createHttpClient(httpClientOptions);
+		}
+
+		@Override
+		public void stop() throws Exception
+		{
+				httpServer.close();
 		}
 }
