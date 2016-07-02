@@ -2,6 +2,8 @@ package cc.vileda.kalfor;
 
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rx.java.ObservableFuture;
 import io.vertx.rxjava.core.buffer.Buffer;
 import io.vertx.rxjava.core.http.*;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 
 class CombineHandler implements Handler<RoutingContext>
 {
+	private final static Logger LOGGER = LoggerFactory.getLogger(CombineHandler.class);
 	private final HttpClient httpClient;
 	private final String proxyHost;
 
@@ -73,12 +76,10 @@ class CombineHandler implements Handler<RoutingContext>
 	private Handler<HttpClientResponse> handleClientResponse(ObservableFuture<Context> observableFuture, String name, String path)
 	{
 		return httpClientResponse -> {
-			{
-				System.out.println(httpClientResponse.statusCode());
-				httpClientResponse.exceptionHandler(Throwable::printStackTrace);
-				httpClientResponse.bodyHandler(buffer -> observableFuture.toHandler()
-						.handle(io.vertx.core.Future.succeededFuture(new Context(name, path, buffer))));
-			}
+			LOGGER.debug(httpClientResponse.statusCode());
+			httpClientResponse.exceptionHandler(Throwable::printStackTrace);
+			httpClientResponse.bodyHandler(buffer -> observableFuture.toHandler()
+					.handle(io.vertx.core.Future.succeededFuture(new Context(name, path, buffer))));
 		};
 	}
 
