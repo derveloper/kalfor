@@ -5,26 +5,26 @@ import java.net.URL;
 import java.util.Objects;
 
 
-public class Endpoint {
+class Endpoint {
     private final URL parsed;
 
-    public Endpoint(final String baseUrl) throws MalformedURLException {
+    Endpoint(final String baseUrl) throws MalformedURLException {
         this.parsed = new URL(baseUrl);
     }
 
-    public String scheme() {
+    private String scheme() {
         return parsed.getProtocol();
     }
 
-    public Boolean isSSL() {
+    Boolean isSSL() {
         return Objects.equals("https", scheme());
     }
 
-    public String host() {
+    String host() {
         return parsed.getHost();
     }
 
-    public int port() {
+    int port() {
         if(parsed.getPort() == -1)
             return parsed.getDefaultPort();
         else
