@@ -51,7 +51,7 @@ class CombineHandler implements Handler<RoutingContext>
 						.end(entries.encodePrettily());
 		}
 
-		private Func1<? super Map.Entry<String, String>, ? extends Observable<? extends Context>> makeRequest(HttpServerRequest request)
+		private Func1<Map.Entry<String, String>, Observable<Context>> makeRequest(HttpServerRequest request)
 		{
 				return pair -> {
 						final ObservableFuture<Context> observableFuture = new ObservableFuture<>();
@@ -82,7 +82,7 @@ class CombineHandler implements Handler<RoutingContext>
 				};
 		}
 
-		private Observable<? extends Map.Entry<String, String>> transformRequest(Buffer buffer)
+		private Observable<Map.Entry<String, String>> transformRequest(Buffer buffer)
 		{
 				return Observable.from(buffer.toJsonArray()
 						.stream()

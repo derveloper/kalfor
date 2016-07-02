@@ -14,9 +14,4 @@ public class KalforOptions
 				this.proxyPort = endpoint.port();
 				this.listenPort = listenPort;
 		}
-
-		public KalforOptions getInstance()
-		{
-				return this;
-		}
 }
