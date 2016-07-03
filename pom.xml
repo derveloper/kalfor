@@ -6,11 +6,46 @@
 
     <groupId>cc.vileda.kalfor</groupId>
     <artifactId>kalfor</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <version>${global.version}</version>
+    <modules>
+        <module>combine-handler</module>
+        <module>verticle</module>
+        <module>core</module>
+        <module>library</module>
+        <module>test</module>
+        <module>example</module>
+    </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <global.version>1.0-SNAPSHOT</global.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>cc.vileda.kalfor</groupId>
+                <artifactId>kalfor-combine-handler</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cc.vileda.kalfor</groupId>
+                <artifactId>kalfor-library</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>cc.vileda.kalfor</groupId>
+                <artifactId>kalfor-verticle</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cc.vileda.kalfor</groupId>
+                <artifactId>kalfor-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>

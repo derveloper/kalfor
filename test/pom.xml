@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>kalfor</artifactId>
+        <groupId>cc.vileda.kalfor</groupId>
+        <version>${global.version}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>kalfor-test</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>cc.vileda.kalfor</groupId>
+            <artifactId>kalfor-verticle</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>
