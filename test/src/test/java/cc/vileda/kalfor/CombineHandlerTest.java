@@ -1,7 +1,7 @@
 package cc.vileda.kalfor;
 
-import cc.vileda.kalfor.core.Endpoint;
-import cc.vileda.kalfor.core.KalforOptions;
+import cc.vileda.kalfor.handler.KalforProxyRequest;
+import cc.vileda.kalfor.handler.KalforRequest;
 import cc.vileda.kalfor.verticle.KalforVerticle;
 import io.restassured.http.Header;
 import io.vertx.core.json.JsonArray;
@@ -19,6 +19,7 @@ import rx.Observable;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.given;
@@ -50,7 +51,7 @@ public class CombineHandlerTest
 		final Observable<String> deployVerticle = RxHelper.deployVerticle(vertx, new RestApiMock(remotePort));
 		final Observable<String> deployVerticle2 = RxHelper.deployVerticle(
 				vertx,
-				new KalforVerticle(new KalforOptions(new Endpoint("http://localhost:" + remotePort), kalforPort))
+				new KalforVerticle(kalforPort)
 		);
 		deployVerticle
 				.subscribe(s -> {
@@ -73,10 +74,15 @@ public class CombineHandlerTest
 	@Test
 	public void combineHandlerShouldCombine()
 	{
-		final String given = new JsonArray(Arrays.asList(
-				new JsonObject().put("firstKey", "/test"),
-				new JsonObject().put("secondKey", "/test")
+		final String given = new JsonArray(Collections.singletonList(
+				new KalforRequest("http://localhost:" + remotePort,
+						Arrays.asList(
+								new KalforProxyRequest("firstKey", "/test"),
+								new KalforProxyRequest("secondKey", "/test")
+						)
+				)
 		)).encodePrettily();
+
 		final String expected = new JsonObject()
 				.put("firstKey", new JsonObject().put("foo", "bar"))
 				.put("secondKey", new JsonObject().put("foo", "bar"))

@@ -14,22 +14,22 @@ public class Endpoint
 		this.parsed = new URL(baseUrl);
 	}
 
-	Boolean isSSL()
+	public Boolean isSSL()
 	{
 		return Objects.equals("https", scheme());
 	}
 
-	private String scheme()
+	public String scheme()
 	{
 		return parsed.getProtocol();
 	}
 
-	String host()
+	public String host()
 	{
 		return parsed.getHost();
 	}
 
-	int port()
+	public int port()
 	{
 		if (parsed.getPort() == -1) { return parsed.getDefaultPort(); }
 		else { return parsed.getPort(); }

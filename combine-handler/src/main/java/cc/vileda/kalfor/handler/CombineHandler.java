@@ -1,14 +1,16 @@
 package cc.vileda.kalfor.handler;
 
-import cc.vileda.kalfor.core.KalforOptions;
+import cc.vileda.kalfor.core.Endpoint;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rx.java.ObservableFuture;
 import io.vertx.rxjava.core.MultiMap;
+import io.vertx.rxjava.core.Vertx;
 import io.vertx.rxjava.core.buffer.Buffer;
 import io.vertx.rxjava.core.http.*;
 import io.vertx.rxjava.ext.web.RoutingContext;
@@ -16,8 +18,7 @@ import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
 
-import java.util.AbstractMap;
-import java.util.Map;
+import java.net.MalformedURLException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -25,13 +26,11 @@ import java.util.stream.Collectors;
 public class CombineHandler implements Handler<RoutingContext>
 {
 	private final static Logger LOGGER = LoggerFactory.getLogger(CombineHandler.class);
-	private final HttpClient httpClient;
-	private final KalforOptions kalforOptions;
+	private final Vertx vertx;
 
-	public CombineHandler(final HttpClient httpClient, final KalforOptions kalforOptions)
+	public CombineHandler(final Vertx vertx)
 	{
-		this.httpClient = httpClient;
-		this.kalforOptions = kalforOptions;
+		this.vertx = vertx;
 	}
 
 	@Override
@@ -51,27 +50,44 @@ public class CombineHandler implements Handler<RoutingContext>
 				.subscribe(sendResponse(request, response));
 	}
 
-	private Func1<Map.Entry<String, String>, Observable<Context>> makeRequest(HttpServerRequest request)
+	private Func1<KalforRequest, Observable<Context>> makeRequest(HttpServerRequest request)
 	{
 		return pair -> {
-			final ObservableFuture<Context> observableFuture = new ObservableFuture<>();
-			final String name = pair.getKey();
-			final String path = pair.getValue();
-			final HttpClientRequest httpClientRequest = httpClient
-					.get(kalforOptions.proxyPort, kalforOptions.proxyHost, path, handleClientResponse(observableFuture, name));
+			try {
+				final Endpoint endpoint = new Endpoint(pair.proxyBaseUrl);
+				request.headers().remove("Origin");
+				request.headers().remove("Host");
+				request.headers().remove("Close");
+				request.headers().remove("Content-Length");
 
-			httpClientRequest.exceptionHandler(Throwable::printStackTrace);
+				final HttpClient httpClient = getHttpClient(endpoint);
 
-			request.headers().remove("Origin");
-			request.headers().remove("Host");
-			request.headers().remove("Close");
-			request.headers().remove("Content-Length");
-			httpClientRequest
-					.putHeader("Host", kalforOptions.proxyHost)
-					.putHeader("Connection", "close");
-			httpClientRequest.headers().addAll(request.headers());
-			httpClientRequest.end();
-			return observableFuture;
+				return Observable.from(pair.proxyRequests)
+						.flatMap(kalforProxyRequest -> {
+							final ObservableFuture<Context> observableFuture = new ObservableFuture<>();
+
+							final HttpClientRequest httpClientRequest = httpClient.get(
+									endpoint.port(),
+									endpoint.host(),
+									kalforProxyRequest.path,
+									handleClientResponse(observableFuture, kalforProxyRequest.key)
+							);
+
+							httpClientRequest.exceptionHandler(Throwable::printStackTrace);
+
+							httpClientRequest
+									.putHeader("Host", endpoint.host())
+									.putHeader("Connection", "close");
+							httpClientRequest.headers().addAll(request.headers());
+							httpClientRequest.end();
+
+							return observableFuture;
+						})
+						.doOnUnsubscribe(httpClient::close);
+			}
+			catch (MalformedURLException e) {
+				return Observable.error(e);
+			}
 		};
 	}
 
@@ -80,6 +96,17 @@ public class CombineHandler implements Handler<RoutingContext>
 		return entries -> response
 				.putHeader("content-type", request.getHeader("content-type"))
 				.end(entries.encodePrettily());
+	}
+
+	private HttpClient getHttpClient(final Endpoint endpoint)
+	{
+		final HttpClientOptions httpClientOptions = new HttpClientOptions()
+				.setDefaultHost(endpoint.host())
+				.setSsl(endpoint.isSSL())
+				.setTrustAll(true)
+				.setVerifyHost(false)
+				.setDefaultPort(endpoint.port());
+		return vertx.createHttpClient(httpClientOptions);
 	}
 
 	private Handler<HttpClientResponse> handleClientResponse(final ObservableFuture<Context> observableFuture, final String name)
@@ -94,21 +121,13 @@ public class CombineHandler implements Handler<RoutingContext>
 		};
 	}
 
-	private Observable<Map.Entry<String, String>> transformRequest(final Buffer buffer)
+	private Observable<KalforRequest> transformRequest(final Buffer buffer)
 	{
 		LOGGER.info("request body: {}", buffer.toString());
 		return Observable.from(buffer.toJsonArray()
 				.stream()
-				.map(object -> (JsonObject) object)
-				.flatMap(entries1 -> entries1.getMap().entrySet().stream())
-				.filter(r -> r.getValue() instanceof String)
-				.map(this::castValueToString)
+				.map(object -> Json.decodeValue(((JsonObject) object).encode(), KalforRequest.class))
 				.collect(Collectors.toList()));
-	}
-
-	private Map.Entry<String, String> castValueToString(final Map.Entry<String, Object> pair)
-	{
-		return new AbstractMap.SimpleEntry<>(pair.getKey(), (String) pair.getValue());
 	}
 
 	private JsonObject aggregateResponse(final JsonObject entries, final Context context)

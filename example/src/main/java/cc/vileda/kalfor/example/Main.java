@@ -13,6 +13,6 @@ class Main
 
 	public static void main(String[] args) throws MalformedURLException
 	{
-		new Kalfor("https://api.github.com").listen(8081);
+		new Kalfor().listen(8080);
 	}
 }
