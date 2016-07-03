@@ -41,7 +41,7 @@ $ curl -H'Content-Type: application/json' \
     <dependency>
         <groupId>cc.vileda.kalfor</groupId>
         <artifactId>kalfor-library</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.1</version>
     </dependency>
 </dependencies>
 ```
@@ -59,7 +59,7 @@ repositories {
 
 #### Add kalfor dependency
 ```groovy
-compile 'cc.vileda.kalfor:kalfor:1.1.0'
+compile 'cc.vileda.kalfor:kalfor:1.1.1'
 ```
 
 ## Use it
