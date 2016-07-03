@@ -29,7 +29,7 @@ which then are combined and send back to the client in a single JSON response.
     <dependency>
         <groupId>cc.vileda.kalfor</groupId>
         <artifactId>kalfor-library</artifactId>
-        <version>1.0.13</version>
+        <version>1.0.15</version>
     </dependency>
 </dependencies>
 ```
@@ -47,7 +47,7 @@ repositories {
 
 #### Add kalfor dependency
 ```groovy
-compile 'cc.vileda.kalfor:kalfor:1.0.13'
+compile 'cc.vileda.kalfor:kalfor:1.0.15'
 ```
 
 ## Use it
