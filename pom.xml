@@ -29,6 +29,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <scm>
+        <connection>scm:git:https://github.com/vileda/kalfor-java.git</connection>
+        <developerConnection>scm:git:https://github.com/vileda/kalfor-java.git</developerConnection>
+        <url>https://github.com/vileda/kalfor-java</url>
+        <tag>1.0.3</tag>
+    </scm>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
