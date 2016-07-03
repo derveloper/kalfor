@@ -1,7 +1,7 @@
 # kalfor
 service for combining http requests.
 
-it transforms a single HTTP `POST` to multiple parallel `GET` requests to a given HTTP backend
+kalfor transforms a single HTTP `POST` request to multiple parallel HTTP `GET` requests to a given HTTP backend
 which then are combined and send back to the client in a single JSON response.
 
 ## installation
