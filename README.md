@@ -105,6 +105,7 @@ $ curl -H'Content-Type: application/json' \
 '{"proxyBaseUrl":"https://api.spotify.com", "headers":[{"name":"Authorization", "value": "Bearer <YOUR_SPOTIFY_API_KEY>"}], '\
 '"proxyRequests":[{"path":"/v1/me", "key":"spotify"}]}]' \
 'http://localhost:8080/combine'
+```
 
 ### existing vert.x application
 if you already have a vert.x application, just grab the
