@@ -1,6 +1,7 @@
 # kalfor
-service for combining http requests.
+kalfor combines http requests.
 
+## what?
 kalfor transforms a single HTTP `POST` request to multiple parallel HTTP `GET` requests to a given HTTP backend
 which then are combined and send back to the client in a single JSON response.
 
