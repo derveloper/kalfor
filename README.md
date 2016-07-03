@@ -29,9 +29,25 @@ which then are combined and send back to the client in a single JSON response.
     <dependency>
         <groupId>cc.vileda.kalfor</groupId>
         <artifactId>kalfor-library</artifactId>
-        <version>1.0.8</version>
+        <version>1.0.13</version>
     </dependency>
 </dependencies>
+```
+
+### gradle
+
+#### Add the bintray repo
+```groovy
+repositories {
+    maven {
+        url  "http://dl.bintray.com/vileda/maven"
+    }
+}
+```
+
+#### Add kalfor dependency
+```groovy
+compile 'cc.vileda.kalfor:kalfor:1.0.13'
 ```
 
 ## Use it
