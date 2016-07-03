@@ -1,4 +1,4 @@
 language: java
-script: mvn test -Dgpg.skip
+install: mvn install -DskipTests -Dgpg.skip
 jdk:
   - oraclejdk8
