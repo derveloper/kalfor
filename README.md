@@ -29,7 +29,7 @@ which then are combined and send back to the client in a single JSON response.
     <dependency>
         <groupId>cc.vileda.kalfor</groupId>
         <artifactId>kalfor-library</artifactId>
-        <version>1.0.15</version>
+        <version>1.0.16</version>
     </dependency>
 </dependencies>
 ```
@@ -47,28 +47,40 @@ repositories {
 
 #### Add kalfor dependency
 ```groovy
-compile 'cc.vileda.kalfor:kalfor:1.0.15'
+compile 'cc.vileda.kalfor:kalfor:1.0.16'
 ```
 
 ## Use it
 
-### create your main function
+### create your main method
 
 ```java
 public class MyKalfor
 {
-	public static void main(String[] args) throws MalformedURLException
+	public static void main(String[] args)
 	{
-		new Kalfor("https://some.api.example.com").listen(8080);
+		new Kalfor().listen(8080);
 	}
 }
 ```
 
+now run the main method in your IDE or build yourself a fat-jar.
+
 ### combine
 ```
-$ curl -H'Content-Type: application/json' --data '[{"responseKey":"/some/endpoint"}]' 'http://localhost:8080/combine'
+$ curl -H'Content-Type: application/json' \
+--data '[{"proxyBaseUrl":"https://api.github.com", "proxyRequests":[{"path":"/", "key":"github"}]},'\
+'{"proxyBaseUrl":"https://api.sipgate.com", "proxyRequests":[{"path":"/v1", "key":"sipgate"}]}]' \
+'http://localhost:8080/combine'
 {
-    "responseKey": { "someEndpointResponseKey": "some data" }
+    "github": {
+        "current_user_url" : ...,
+        ...
+    },
+    "sipgate" : {
+        "authorizationOauthClientsSecretUrl" : ...,
+        ...
+    }
 }
 ```
 
