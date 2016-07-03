@@ -73,6 +73,32 @@ public class CombineHandler implements Handler<RoutingContext>
 		};
 	}
 
+	private Action1<JsonObject> sendResponse(final HttpServerRequest request, final HttpServerResponse response)
+	{
+		return entries -> response
+				.putHeader("content-type", request.getHeader("content-type"))
+				.end(entries.encodePrettily());
+	}
+
+	private HttpClient getHttpClient(final Endpoint endpoint)
+	{
+		final HttpClientOptions httpClientOptions = new HttpClientOptions()
+				.setDefaultHost(endpoint.host())
+				.setSsl(endpoint.isSSL())
+				.setTrustAll(true)
+				.setVerifyHost(false)
+				.setDefaultPort(endpoint.port());
+		return vertx.createHttpClient(httpClientOptions);
+	}
+
+	private void removeRequestHeaders(final HttpServerRequest request)
+	{
+		request.headers().remove("Origin");
+		request.headers().remove("Host");
+		request.headers().remove("Close");
+		request.headers().remove("Content-Length");
+	}
+
 	private Func1<KalforProxyRequest, Observable<Context>> getProxyPath(
 			final List<KalforProxyHeader> headers, final HttpServerRequest request,
 			final Endpoint endpoint,
@@ -103,32 +129,6 @@ public class CombineHandler implements Handler<RoutingContext>
 
 			return observableFuture;
 		};
-	}
-
-	private void removeRequestHeaders(final HttpServerRequest request)
-	{
-		request.headers().remove("Origin");
-		request.headers().remove("Host");
-		request.headers().remove("Close");
-		request.headers().remove("Content-Length");
-	}
-
-	private Action1<JsonObject> sendResponse(final HttpServerRequest request, final HttpServerResponse response)
-	{
-		return entries -> response
-				.putHeader("content-type", request.getHeader("content-type"))
-				.end(entries.encodePrettily());
-	}
-
-	private HttpClient getHttpClient(final Endpoint endpoint)
-	{
-		final HttpClientOptions httpClientOptions = new HttpClientOptions()
-				.setDefaultHost(endpoint.host())
-				.setSsl(endpoint.isSSL())
-				.setTrustAll(true)
-				.setVerifyHost(false)
-				.setDefaultPort(endpoint.port());
-		return vertx.createHttpClient(httpClientOptions);
 	}
 
 	private Handler<HttpClientResponse> handleClientResponse(final ObservableFuture<Context> observableFuture, final String name)
