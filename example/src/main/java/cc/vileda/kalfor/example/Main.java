@@ -2,8 +2,6 @@ package cc.vileda.kalfor.example;
 
 import cc.vileda.kalfor.Kalfor;
 
-import java.net.MalformedURLException;
-
 
 class Main
 {

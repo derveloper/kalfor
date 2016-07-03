@@ -19,7 +19,6 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 
 import java.net.MalformedURLException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;

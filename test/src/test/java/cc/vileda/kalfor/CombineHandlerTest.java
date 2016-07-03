@@ -24,7 +24,6 @@ import java.util.Collections;
 
 import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.given;
-import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.containsString;
 
 
