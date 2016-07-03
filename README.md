@@ -41,7 +41,7 @@ $ curl -H'Content-Type: application/json' \
     <dependency>
         <groupId>cc.vileda.kalfor</groupId>
         <artifactId>kalfor-library</artifactId>
-        <version>1.0.17</version>
+        <version>1.0.18</version>
     </dependency>
 </dependencies>
 ```
@@ -59,7 +59,7 @@ repositories {
 
 #### Add kalfor dependency
 ```groovy
-compile 'cc.vileda.kalfor:kalfor:1.0.17'
+compile 'cc.vileda.kalfor:kalfor:1.0.18'
 ```
 
 ## Use it
@@ -95,6 +95,16 @@ $ curl -H'Content-Type: application/json' \
     }
 }
 ```
+
+#### headers
+kalfor is able to send specific headers to each backend. just provide a list of header in your request JSON
+
+```
+$ curl -H'Content-Type: application/json' \
+--data '[{"proxyBaseUrl":"https://api.github.com", "proxyRequests":[{"path":"/", "key":"github"}]},'\
+'{"proxyBaseUrl":"https://api.spotify.com", "headers":[{"name":"Authorization", "value": "Bearer <YOUR_SPOTIFY_API_KEY>"}], '\
+'"proxyRequests":[{"path":"/v1/me", "key":"spotify"}]}]' \
+'http://localhost:8080/combine'
 
 ### existing vert.x application
 if you already have a vert.x application, just grab the
