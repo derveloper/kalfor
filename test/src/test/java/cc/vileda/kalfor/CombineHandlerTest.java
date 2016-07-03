@@ -28,10 +28,6 @@ import static org.hamcrest.Matchers.containsString;
 @RunWith(VertxUnitRunner.class)
 public class CombineHandlerTest
 {
-	static {
-		System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.Log4j2LogDelegateFactory");
-	}
-
 	private final int kalforPort = getRandomPort();
 	private final int remotePort = getRandomPort();
 
@@ -54,7 +50,7 @@ public class CombineHandlerTest
 		final Observable<String> deployVerticle = RxHelper.deployVerticle(vertx, new RestApiMock(remotePort));
 		final Observable<String> deployVerticle2 = RxHelper.deployVerticle(
 				vertx,
-				new KalforVerticle(new KalforOptions(new Endpoint("http://api.local:" + remotePort), kalforPort))
+				new KalforVerticle(new KalforOptions(new Endpoint("http://localhost:" + remotePort), kalforPort))
 		);
 		deployVerticle
 				.subscribe(s -> {
@@ -69,7 +65,7 @@ public class CombineHandlerTest
 	@Test
 	public void restApiMockShouldRespond()
 	{
-		get("http://combine.local:" + remotePort + "/test")
+		get("http://localhost:" + remotePort + "/test")
 				.then()
 				.body(containsString(new JsonObject().put("foo", "bar").encodePrettily()));
 	}
@@ -87,10 +83,9 @@ public class CombineHandlerTest
 				.encodePrettily();
 		given()
 				.body(given)
-				//.header(new Header("Host", "some.api.local"))
 				.header(new Header("Content-Type", "application/json"))
 				.when()
-				.post("http://combine.local:" + kalforPort + "/combine")
+				.post("http://localhost:" + kalforPort + "/combine")
 				.then()
 				.body(containsString(expected));
 	}
