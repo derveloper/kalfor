@@ -6,12 +6,16 @@ service for combining http requests
 ## maven
 Add the bintray repo
 ```xml
-<dependency>
-  <groupId>cc.vileda.kalfor</groupId>
-  <artifactId>kalfor</artifactId>
-  <version>1.0.8</version>
-  <type>pom</type>
-</dependency>
+<repositories>
+    <repository>
+        <snapshots>
+            <enabled>false</enabled>
+        </snapshots>
+        <id>bintray-vileda-maven</id>
+        <name>bintray</name>
+        <url>http://dl.bintray.com/vileda/maven</url>
+    </repository>
+</repositories>
 ```
 
 Add kalfor dependency
