@@ -14,4 +14,15 @@ public class KalforOptions
 		this.proxyPort = endpoint.port();
 		this.listenPort = listenPort;
 	}
+
+	@Override
+	public String toString()
+	{
+		return "KalforOptions{" +
+				"ssl=" + ssl +
+				", proxyHost='" + proxyHost + '\'' +
+				", proxyPort=" + proxyPort +
+				", listenPort=" + listenPort +
+				'}';
+	}
 }

@@ -1,6 +1,8 @@
 package cc.vileda.kalfor;
 
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.core.AbstractVerticle;
 import io.vertx.rxjava.core.http.HttpClient;
 import io.vertx.rxjava.core.http.HttpServer;
@@ -10,6 +12,8 @@ import io.vertx.rxjava.ext.web.handler.CorsHandler;
 
 public class KalforVerticle extends AbstractVerticle
 {
+	private final static Logger LOGGER = LoggerFactory.getLogger(KalforVerticle.class);
+
 	private final KalforOptions kalforOptions;
 	private HttpServer httpServer;
 
@@ -27,17 +31,22 @@ public class KalforVerticle extends AbstractVerticle
 		final Router router = Router.router(vertx);
 		router.route().handler(CorsHandler.create("*").allowedHeader("authorization"));
 
-		router.post("/combine").handler(new CombineHandler(httpClient, kalforOptions.proxyHost));
-		router.get("/combine").handler(new CombineHandler(httpClient, kalforOptions.proxyHost));
+		router.post("/combine").handler(new CombineHandler(httpClient, kalforOptions));
+		router.get("/combine").handler(new CombineHandler(httpClient, kalforOptions));
 
 		httpServer.requestHandler(router::accept).listen(kalforOptions.listenPort);
 	}
 
 	private HttpClient createHttpClient()
 	{
-		final HttpClientOptions
-				httpClientOptions =
-				new HttpClientOptions().setDefaultHost(kalforOptions.proxyHost).setSsl(kalforOptions.ssl).setDefaultPort(kalforOptions.proxyPort);
+		final HttpClientOptions httpClientOptions = new HttpClientOptions()
+				.setDefaultHost(kalforOptions.proxyHost)
+				.setSsl(kalforOptions.ssl)
+				.setTrustAll(true)
+				.setVerifyHost(false)
+				.setDefaultPort(kalforOptions.proxyPort);
+
+		LOGGER.info(kalforOptions.toString());
 
 		return vertx.createHttpClient(httpClientOptions);
 	}

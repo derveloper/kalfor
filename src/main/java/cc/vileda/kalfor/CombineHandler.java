@@ -1,10 +1,13 @@
 package cc.vileda.kalfor;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rx.java.ObservableFuture;
+import io.vertx.rxjava.core.MultiMap;
 import io.vertx.rxjava.core.buffer.Buffer;
 import io.vertx.rxjava.core.http.*;
 import io.vertx.rxjava.ext.web.RoutingContext;
@@ -22,12 +25,12 @@ class CombineHandler implements Handler<RoutingContext>
 {
 	private final static Logger LOGGER = LoggerFactory.getLogger(CombineHandler.class);
 	private final HttpClient httpClient;
-	private final String proxyHost;
+	private final KalforOptions kalforOptions;
 
-	CombineHandler(final HttpClient httpClient, final String proxyHost)
+	CombineHandler(final HttpClient httpClient, final KalforOptions kalforOptions)
 	{
 		this.httpClient = httpClient;
-		this.proxyHost = proxyHost;
+		this.kalforOptions = kalforOptions;
 	}
 
 	@Override
@@ -53,15 +56,20 @@ class CombineHandler implements Handler<RoutingContext>
 			final ObservableFuture<Context> observableFuture = new ObservableFuture<>();
 			final String name = pair.getKey();
 			final String path = pair.getValue();
-			final HttpClientRequest httpClientRequest = httpClient.get(path, handleClientResponse(observableFuture, name, path));
+			final HttpClientRequest httpClientRequest = httpClient
+					.get(kalforOptions.proxyPort, kalforOptions.proxyHost, path, handleClientResponse(observableFuture, name, path));
 
 			httpClientRequest.exceptionHandler(Throwable::printStackTrace);
+
 			request.headers().remove("Origin");
-			httpClientRequest.headers().addAll(request.headers());
+			request.headers().remove("Host");
+			request.headers().remove("Close");
+			request.headers().remove("Content-Length");
 			httpClientRequest
-					.putHeader("Connection", "close")
-					.putHeader("Host", proxyHost)
-					.end();
+					.putHeader("Host", kalforOptions.proxyHost)
+					.putHeader("Connection", "close");
+			httpClientRequest.headers().addAll(request.headers());
+			httpClientRequest.end();
 			return observableFuture;
 		};
 	}
@@ -73,18 +81,21 @@ class CombineHandler implements Handler<RoutingContext>
 				.end(entries.encodePrettily());
 	}
 
-	private Handler<HttpClientResponse> handleClientResponse(ObservableFuture<Context> observableFuture, String name, String path)
+	private Handler<HttpClientResponse> handleClientResponse(final ObservableFuture<Context> observableFuture, final String name, final String path)
 	{
 		return httpClientResponse -> {
-			LOGGER.debug(httpClientResponse.statusCode());
+			LOGGER.info("status code: {}", HttpResponseStatus.valueOf(httpClientResponse.statusCode()));
 			httpClientResponse.exceptionHandler(Throwable::printStackTrace);
+			final MultiMap headers = httpClientResponse.headers();
+			LOGGER.info("headers: {}", Json.encodePrettily(headers.names().stream().map(headers::getAll).collect(Collectors.toList())));
 			httpClientResponse.bodyHandler(buffer -> observableFuture.toHandler()
 					.handle(io.vertx.core.Future.succeededFuture(new Context(name, path, buffer))));
 		};
 	}
 
-	private Observable<Map.Entry<String, String>> transformRequest(Buffer buffer)
+	private Observable<Map.Entry<String, String>> transformRequest(final Buffer buffer)
 	{
+		LOGGER.info("request body: {}", buffer.toString());
 		return Observable.from(buffer.toJsonArray()
 				.stream()
 				.map(object -> (JsonObject) object)
@@ -103,7 +114,8 @@ class CombineHandler implements Handler<RoutingContext>
 	{
 		final String path = context.name;
 		final String body = context.buffer.toString();
-		System.out.println(body);
+
+		LOGGER.info("response body: {}", body);
 
 		return body.trim().startsWith("{")
 				? entries.put(path, new JsonObject(body))

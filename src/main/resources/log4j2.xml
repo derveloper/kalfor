@@ -6,10 +6,7 @@
         </Console>
     </Appenders>
     <Loggers>
-        <Logger name="io.vertx.rxjava" additivity="false">
-            <AppenderRef ref="Console" level="TRACE" />
-        </Logger>
-        <Root level="INFO">
+        <Root level="TRACE">
             <AppenderRef ref="Console" />
         </Root>
     </Loggers>
