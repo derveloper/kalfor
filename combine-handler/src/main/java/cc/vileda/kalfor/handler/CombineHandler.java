@@ -19,6 +19,7 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 
 import java.net.MalformedURLException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -60,7 +61,7 @@ public class CombineHandler implements Handler<RoutingContext>
 				removeRequestHeaders(request);
 
 				return Observable.from(pair.proxyRequests)
-						.flatMap(getProxyPath(request, endpoint, httpClient))
+						.flatMap(getProxyPath(pair.headers, request, endpoint, httpClient))
 						.doOnUnsubscribe(httpClient::close);
 			}
 			catch (MalformedURLException e) {
@@ -70,7 +71,7 @@ public class CombineHandler implements Handler<RoutingContext>
 	}
 
 	private Func1<KalforProxyRequest, Observable<Context>> getProxyPath(
-			final HttpServerRequest request,
+			final List<KalforProxyHeader> headers, final HttpServerRequest request,
 			final Endpoint endpoint,
 			final HttpClient httpClient)
 	{
@@ -83,6 +84,11 @@ public class CombineHandler implements Handler<RoutingContext>
 					kalforProxyRequest.path,
 					handleClientResponse(observableFuture, kalforProxyRequest.key)
 			);
+
+			headers.forEach(header -> {
+				httpClientRequest.putHeader(header.name, header.value);
+				request.headers().remove(header.name);
+			});
 
 			httpClientRequest.exceptionHandler(Throwable::printStackTrace);
 

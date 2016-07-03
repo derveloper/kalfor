@@ -29,6 +29,7 @@ class RestApiMock extends AbstractVerticle
 		final Router router = Router.router(vertx);
 		router.route("/test").handler(routingContext -> {
 			final MultiMap headers = routingContext.request().headers();
+			LOGGER.info(Json.encodePrettily(headers.names()));
 			LOGGER.info(Json.encodePrettily(headers.names().stream().map(headers::getAll).collect(Collectors.toList())));
 			routingContext.response()
 					.putHeader("content-type", "application/json")

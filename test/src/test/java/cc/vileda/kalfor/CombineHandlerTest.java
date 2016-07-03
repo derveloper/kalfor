@@ -1,5 +1,6 @@
 package cc.vileda.kalfor;
 
+import cc.vileda.kalfor.handler.KalforProxyHeader;
 import cc.vileda.kalfor.handler.KalforProxyRequest;
 import cc.vileda.kalfor.handler.KalforRequest;
 import cc.vileda.kalfor.verticle.KalforVerticle;
@@ -23,6 +24,7 @@ import java.util.Collections;
 
 import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.given;
+import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.containsString;
 
 
@@ -75,7 +77,9 @@ public class CombineHandlerTest
 	public void combineHandlerShouldCombine()
 	{
 		final String given = new JsonArray(Collections.singletonList(
-				new KalforRequest("http://localhost:" + remotePort,
+				new KalforRequest(
+						"http://localhost:" + remotePort,
+						Collections.singletonList(new KalforProxyHeader("x-foo", "bar")),
 						Arrays.asList(
 								new KalforProxyRequest("firstKey", "/test"),
 								new KalforProxyRequest("secondKey", "/test")

@@ -9,6 +9,9 @@ public class KalforRequest
 	public String proxyBaseUrl;
 
 	@SuppressWarnings("WeakerAccess")
+	public List<KalforProxyHeader> headers;
+
+	@SuppressWarnings("WeakerAccess")
 	public List<KalforProxyRequest> proxyRequests;
 
 	@SuppressWarnings("unused")
@@ -16,9 +19,10 @@ public class KalforRequest
 	{
 	}
 
-	public KalforRequest(final String proxyBaseUrl, final List<KalforProxyRequest> proxyRequests)
+	public KalforRequest(final String proxyBaseUrl, final List<KalforProxyHeader> headers, final List<KalforProxyRequest> proxyRequests)
 	{
 		this.proxyBaseUrl = proxyBaseUrl;
+		this.headers = headers;
 		this.proxyRequests = proxyRequests;
 	}
 }
