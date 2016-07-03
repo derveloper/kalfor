@@ -1,5 +1,5 @@
 # kalfor
-kalfor combines http requests.
+kalfor combines HTTP requests.
 
 ## what?
 kalfor transforms a single HTTP `POST` request to multiple parallel HTTP `GET` requests to a given HTTP backend
