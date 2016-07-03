@@ -7,7 +7,7 @@
     <groupId>cc.vileda.kalfor</groupId>
     <artifactId>kalfor</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.3</version>
 
     <licenses>
         <license>
