@@ -7,7 +7,7 @@
     <groupId>cc.vileda.kalfor</groupId>
     <artifactId>kalfor</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.3</version>
+    <version>1.0.4-SNAPSHOT</version>
 
     <licenses>
         <license>
@@ -33,7 +33,7 @@
         <connection>scm:git:https://github.com/vileda/kalfor-java.git</connection>
         <developerConnection>scm:git:https://github.com/vileda/kalfor-java.git</developerConnection>
         <url>https://github.com/vileda/kalfor-java</url>
-        <tag>1.0.3</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencyManagement>
