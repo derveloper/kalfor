@@ -1,10 +1,14 @@
 # kalfor
-service for combining http requests
+service for combining http requests.
 
-# installation
+it transforms a single HTTP `POST` to multiple parallel `GET` request to a given HTTP backend
+which then are combined and send back to the client in a single JSON response.
 
-## maven
-### Add the bintray repo
+## installation
+
+### maven
+
+#### Add the bintray repo
 ```xml
 <repositories>
     <repository>
@@ -18,7 +22,7 @@ service for combining http requests
 </repositories>
 ```
 
-### Add kalfor dependency
+#### Add kalfor dependency
 ```xml
 <dependencies>
     <dependency>
@@ -29,7 +33,10 @@ service for combining http requests
 </dependencies>
 ```
 
-# Use it
+## Use it
+
+### create your main function
+
 ```java
 public class MyKalfor
 {
@@ -40,7 +47,15 @@ public class MyKalfor
 }
 ```
 
-# license
+### combine
+```
+$ curl -H'Content-Type: application/json' --data '[{"responseKey":"/some/endpoint"}]' 'http://localhost:8080/combine'
+{
+    "responseKey": { "someEndpointResponseKey": "some data" }
+}
+```
+
+## license
 ```
 Copyright 2016 Tristan Leo
 
