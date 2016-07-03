@@ -4,7 +4,7 @@ service for combining http requests
 # installation
 
 ## maven
-Add the bintray repo
+### Add the bintray repo
 ```xml
 <repositories>
     <repository>
@@ -18,7 +18,7 @@ Add the bintray repo
 </repositories>
 ```
 
-Add kalfor dependency
+### Add kalfor dependency
 ```xml
 <dependencies>
     <dependency>
@@ -29,7 +29,7 @@ Add kalfor dependency
 </dependencies>
 ```
 
-Use it
+# Use it
 ```java
 public class MyKalfor
 {
