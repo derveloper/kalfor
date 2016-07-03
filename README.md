@@ -1,4 +1,6 @@
 # kalfor
+[ ![Download](https://api.bintray.com/packages/vileda/maven/kalfor-java/images/download.svg) ](https://bintray.com/vileda/maven/kalfor-java/_latestVersion)
+
 kalfor combines HTTP requests.
 
 ## what?
