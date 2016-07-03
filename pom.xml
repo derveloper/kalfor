@@ -28,8 +28,8 @@
     </properties>
 
     <scm>
-        <connection>scm:git:https://github.com/vileda/kalfor-java.git</connection>
-        <developerConnection>scm:git:https://github.com/vileda/kalfor-java.git</developerConnection>
+        <connection>scm:git:ssh+git://github.com/vileda/kalfor-java.git</connection>
+        <developerConnection>scm:git:ssh+git://github.com/vileda/kalfor-java.git</developerConnection>
         <url>https://github.com/vileda/kalfor-java</url>
         <tag>HEAD</tag>
     </scm>
