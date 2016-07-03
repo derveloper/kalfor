@@ -5,6 +5,18 @@ kalfor combines HTTP requests.
 kalfor transforms a single HTTP `POST` request to multiple parallel HTTP `GET` requests to a given HTTP backend
 which then are combined and send back to the client in a single JSON response.
 
+## demo instance
+
+You can find the demo instance at https://kalfor.herokuapp.com/combine
+
+### try it yourself
+```
+$ curl -H'Content-Type: application/json' \
+--data '[{"proxyBaseUrl":"https://api.github.com", "proxyRequests":[{"path":"/", "key":"github"}]},'\
+'{"proxyBaseUrl":"https://api.spotify.com", "proxyRequests":[{"path":"/v1", "key":"spotify"}]}]' \
+'https://kalfor.herokuapp.com/combine'
+```
+
 ## installation
 
 ### maven
