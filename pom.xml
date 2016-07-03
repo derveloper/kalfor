@@ -39,22 +39,22 @@
             <dependency>
                 <groupId>cc.vileda.kalfor</groupId>
                 <artifactId>kalfor-combine-handler</artifactId>
-                <version>${project.version}</version>
+                <version>1.0.4</version>
             </dependency>
             <dependency>
                 <groupId>cc.vileda.kalfor</groupId>
                 <artifactId>kalfor-library</artifactId>
-                <version>${project.version}</version>
+                <version>1.0.4</version>
             </dependency>
             <dependency>
                 <groupId>cc.vileda.kalfor</groupId>
                 <artifactId>kalfor-verticle</artifactId>
-                <version>${project.version}</version>
+                <version>1.0.4</version>
             </dependency>
             <dependency>
                 <groupId>cc.vileda.kalfor</groupId>
                 <artifactId>kalfor-core</artifactId>
-                <version>${project.version}</version>
+                <version>1.0.4</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
