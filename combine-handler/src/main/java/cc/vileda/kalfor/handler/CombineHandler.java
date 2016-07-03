@@ -42,7 +42,7 @@ public class CombineHandler implements Handler<RoutingContext>
 		event.request()
 				.toObservable()
 				.flatMap(this::transformRequest)
-				.flatMap(makeRequest(request))
+				.flatMap(proxyRequest(request))
 				.timeout(5, TimeUnit.SECONDS)
 				.reduce(new JsonObject(), this::aggregateResponse)
 				.doOnError(Throwable::printStackTrace)
@@ -50,45 +50,58 @@ public class CombineHandler implements Handler<RoutingContext>
 				.subscribe(sendResponse(request, response));
 	}
 
-	private Func1<KalforRequest, Observable<Context>> makeRequest(HttpServerRequest request)
+	private Func1<KalforRequest, Observable<Context>> proxyRequest(HttpServerRequest request)
 	{
 		return pair -> {
 			try {
 				final Endpoint endpoint = new Endpoint(pair.proxyBaseUrl);
-				request.headers().remove("Origin");
-				request.headers().remove("Host");
-				request.headers().remove("Close");
-				request.headers().remove("Content-Length");
-
 				final HttpClient httpClient = getHttpClient(endpoint);
 
+				removeRequestHeaders(request);
+
 				return Observable.from(pair.proxyRequests)
-						.flatMap(kalforProxyRequest -> {
-							final ObservableFuture<Context> observableFuture = new ObservableFuture<>();
-
-							final HttpClientRequest httpClientRequest = httpClient.get(
-									endpoint.port(),
-									endpoint.host(),
-									kalforProxyRequest.path,
-									handleClientResponse(observableFuture, kalforProxyRequest.key)
-							);
-
-							httpClientRequest.exceptionHandler(Throwable::printStackTrace);
-
-							httpClientRequest
-									.putHeader("Host", endpoint.host())
-									.putHeader("Connection", "close");
-							httpClientRequest.headers().addAll(request.headers());
-							httpClientRequest.end();
-
-							return observableFuture;
-						})
+						.flatMap(getProxyPath(request, endpoint, httpClient))
 						.doOnUnsubscribe(httpClient::close);
 			}
 			catch (MalformedURLException e) {
 				return Observable.error(e);
 			}
 		};
+	}
+
+	private Func1<KalforProxyRequest, Observable<Context>> getProxyPath(
+			final HttpServerRequest request,
+			final Endpoint endpoint,
+			final HttpClient httpClient)
+	{
+		return kalforProxyRequest -> {
+			final ObservableFuture<Context> observableFuture = new ObservableFuture<>();
+
+			final HttpClientRequest httpClientRequest = httpClient.get(
+					endpoint.port(),
+					endpoint.host(),
+					kalforProxyRequest.path,
+					handleClientResponse(observableFuture, kalforProxyRequest.key)
+			);
+
+			httpClientRequest.exceptionHandler(Throwable::printStackTrace);
+
+			httpClientRequest
+					.putHeader("Host", endpoint.host())
+					.putHeader("Connection", "close");
+			httpClientRequest.headers().addAll(request.headers());
+			httpClientRequest.end();
+
+			return observableFuture;
+		};
+	}
+
+	private void removeRequestHeaders(final HttpServerRequest request)
+	{
+		request.headers().remove("Origin");
+		request.headers().remove("Host");
+		request.headers().remove("Close");
+		request.headers().remove("Content-Length");
 	}
 
 	private Action1<JsonObject> sendResponse(final HttpServerRequest request, final HttpServerResponse response)
