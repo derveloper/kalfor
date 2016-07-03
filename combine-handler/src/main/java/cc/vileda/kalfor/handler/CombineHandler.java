@@ -19,9 +19,13 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 
 import java.net.MalformedURLException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyList;
 
 
 public class CombineHandler implements Handler<RoutingContext>
@@ -85,7 +89,7 @@ public class CombineHandler implements Handler<RoutingContext>
 					handleClientResponse(observableFuture, kalforProxyRequest.key)
 			);
 
-			headers.forEach(header -> {
+			Optional.ofNullable(headers).orElse(emptyList()).forEach(header -> {
 				httpClientRequest.putHeader(header.name, header.value);
 				request.headers().remove(header.name);
 			});
