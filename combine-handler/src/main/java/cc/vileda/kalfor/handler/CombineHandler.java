@@ -125,10 +125,10 @@ public class CombineHandler implements Handler<RoutingContext>
 	private Handler<HttpClientResponse> handleClientResponse(final ObservableFuture<Context> observableFuture, final String name)
 	{
 		return httpClientResponse -> {
-			LOGGER.info("status code: {}", HttpResponseStatus.valueOf(httpClientResponse.statusCode()));
+			LOGGER.debug("status code: {}", HttpResponseStatus.valueOf(httpClientResponse.statusCode()));
 			httpClientResponse.exceptionHandler(Throwable::printStackTrace);
 			final MultiMap headers = httpClientResponse.headers();
-			LOGGER.info("headers: {}", Json.encodePrettily(headers.names().stream().map(headers::getAll).collect(Collectors.toList())));
+			LOGGER.debug("headers: {}", Json.encodePrettily(headers.names().stream().map(headers::getAll).collect(Collectors.toList())));
 			httpClientResponse.bodyHandler(buffer -> observableFuture.toHandler()
 					.handle(io.vertx.core.Future.succeededFuture(new Context(name, buffer))));
 		};
@@ -136,7 +136,7 @@ public class CombineHandler implements Handler<RoutingContext>
 
 	private Observable<KalforRequest> transformRequest(final Buffer buffer)
 	{
-		LOGGER.info("request body: {}", buffer.toString());
+		LOGGER.debug("request body: {}", buffer.toString());
 		return Observable.from(buffer.toJsonArray()
 				.stream()
 				.map(object -> Json.decodeValue(((JsonObject) object).encode(), KalforRequest.class))
@@ -148,7 +148,7 @@ public class CombineHandler implements Handler<RoutingContext>
 		final String path = context.name;
 		final String body = context.buffer.toString();
 
-		LOGGER.info("response body: {}", body);
+		LOGGER.debug("response body: {}", body);
 
 		return body.trim().startsWith("{")
 				? entries.put(path, new JsonObject(body))

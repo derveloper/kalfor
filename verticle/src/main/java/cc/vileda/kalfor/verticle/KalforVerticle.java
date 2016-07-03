@@ -12,6 +12,7 @@ public class KalforVerticle extends AbstractVerticle
 	private final int listenPort;
 	private HttpServer httpServer;
 
+	@SuppressWarnings("unused")
 	public KalforVerticle()
 	{
 		this(8080);

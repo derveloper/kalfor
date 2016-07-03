@@ -5,9 +5,10 @@ import java.util.List;
 
 public class KalforRequest
 {
-	public String proxyBaseUrl;
-	public List<KalforProxyRequest> proxyRequests;
+	String proxyBaseUrl;
+	List<KalforProxyRequest> proxyRequests;
 
+	@SuppressWarnings("unused")
 	public KalforRequest()
 	{
 	}

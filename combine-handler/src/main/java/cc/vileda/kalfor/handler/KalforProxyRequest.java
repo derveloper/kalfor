@@ -2,9 +2,10 @@ package cc.vileda.kalfor.handler;
 
 public class KalforProxyRequest
 {
-	public String key;
-	public String path;
+	String key;
+	String path;
 
+	@SuppressWarnings("unused")
 	public KalforProxyRequest()
 	{
 	}
