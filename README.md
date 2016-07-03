@@ -97,7 +97,7 @@ $ curl -H'Content-Type: application/json' \
 ```
 
 #### headers
-kalfor is able to send specific headers to each backend. just provide a list of header in your request JSON
+kalfor is able to send specific headers to each backend. Just provide a list of headers in your request JSON
 
 ```
 $ curl -H'Content-Type: application/json' \
