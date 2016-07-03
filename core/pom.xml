@@ -3,7 +3,7 @@
     <parent>
         <artifactId>kalfor</artifactId>
         <groupId>cc.vileda.kalfor</groupId>
-        <version>1.0.8-SNAPSHOT</version>
+        <version>1.0.8</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
