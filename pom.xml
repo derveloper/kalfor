@@ -7,7 +7,7 @@
     <groupId>cc.vileda.kalfor</groupId>
     <artifactId>kalfor</artifactId>
     <packaging>pom</packaging>
-    <version>${global.version}</version>
+    <version>1.0-SNAPSHOT</version>
     <modules>
         <module>combine-handler</module>
         <module>verticle</module>
@@ -19,7 +19,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <global.version>1.0-SNAPSHOT</global.version>
     </properties>
 
     <dependencyManagement>
