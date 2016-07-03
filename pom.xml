@@ -5,7 +5,7 @@
     <groupId>cc.vileda.kalfor</groupId>
     <artifactId>kalfor</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.9-SNAPSHOT</version>
+    <version>1.0.9</version>
 
     <licenses>
         <license>
@@ -31,7 +31,7 @@
         <connection>scm:git:https://github.com/vileda/kalfor-java.git</connection>
         <developerConnection>scm:git:https://github.com/vileda/kalfor-java.git</developerConnection>
         <url>https://github.com/vileda/kalfor-java</url>
-        <tag>HEAD</tag>
+        <tag>kalfor-1.0.9</tag>
     </scm>
 
     <dependencyManagement>
@@ -39,22 +39,22 @@
             <dependency>
                 <groupId>cc.vileda.kalfor</groupId>
                 <artifactId>kalfor-combine-handler</artifactId>
-                <version>1.0.9-SNAPSHOT</version>
+                <version>1.0.9</version>
             </dependency>
             <dependency>
                 <groupId>cc.vileda.kalfor</groupId>
                 <artifactId>kalfor-library</artifactId>
-                <version>1.0.9-SNAPSHOT</version>
+                <version>1.0.9</version>
             </dependency>
             <dependency>
                 <groupId>cc.vileda.kalfor</groupId>
                 <artifactId>kalfor-verticle</artifactId>
-                <version>1.0.9-SNAPSHOT</version>
+                <version>1.0.9</version>
             </dependency>
             <dependency>
                 <groupId>cc.vileda.kalfor</groupId>
                 <artifactId>kalfor-core</artifactId>
-                <version>1.0.9-SNAPSHOT</version>
+                <version>1.0.9</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
