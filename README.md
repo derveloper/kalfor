@@ -55,6 +55,9 @@ $ curl -H'Content-Type: application/json' --data '[{"responseKey":"/some/endpoin
 }
 ```
 
+### existing vert.x application
+if you already have a vert.x application, just grab the `kalfor-library` or `kalfor-combine-handler` maven module.
+
 ## license
 ```
 Copyright 2016 Tristan Leo
