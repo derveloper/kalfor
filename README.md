@@ -21,16 +21,16 @@ $ curl -H'Content-Type: application/json' \
 
 ### maven
 
-#### Add the bintray repo
+#### Add the jcenter repo
 ```xml
 <repositories>
     <repository>
         <snapshots>
             <enabled>false</enabled>
         </snapshots>
-        <id>bintray-vileda-maven</id>
+        <id>central</id>
         <name>bintray</name>
-        <url>http://dl.bintray.com/vileda/maven</url>
+        <url>http://jcenter.bintray.com</url>
     </repository>
 </repositories>
 ```
@@ -51,9 +51,7 @@ $ curl -H'Content-Type: application/json' \
 #### Add the bintray repo
 ```groovy
 repositories {
-    maven {
-        url  "http://dl.bintray.com/vileda/maven"
-    }
+   jcenter()
 }
 ```
 
