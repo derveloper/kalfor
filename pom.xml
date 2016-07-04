@@ -29,7 +29,6 @@
         <module>core</module>
         <module>library</module>
         <module>test</module>
-        <module>example</module>
     </modules>
 
     <properties>
@@ -128,7 +127,6 @@
                 <version>2.10.4</version>
                 <configuration>
                     <aggregate>true</aggregate>
-                    <excludePackageNames>cc.vileda.kalfor.example</excludePackageNames>
                 </configuration>
                 <executions>
                     <execution>
