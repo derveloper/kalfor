@@ -9,8 +9,8 @@ kalfor transforms a single HTTP `POST` request to multiple parallel HTTP `GET` r
 which then are combined and send back to the client in a single JSON response.
 
 ## why
-while developing frontends for REST APIs you'll face perfomance problems because you have to make too many requests.
-with klafor you can combine all your REST Calls into a single `POST` request. kalfor will fetch each endpoint in parallel for you and
+while developing frontends for REST APIs you'll face performance problems because you have to make too many requests.
+with kalfor you can combine all your REST Calls into a single `POST` request. kalfor will fetch each endpoint in parallel for you and
 and respond all API responses in a single JSON to you.
 
 ## demo instance
