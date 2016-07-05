@@ -7,6 +7,12 @@
     <packaging>pom</packaging>
     <version>1.2.1-SNAPSHOT</version>
 
+    <name>kalfor</name>
+    <description>
+        kalfor transforms a single HTTP POST request to multiple parallel HTTP GET requests to a given HTTP backend which then are combined and send back to the client in a single JSON response.
+    </description>
+    <url>https://github.com/vileda/kalfor-java</url>
+
     <licenses>
         <license>
             <name>Apache-2.0</name>
