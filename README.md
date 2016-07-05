@@ -29,43 +29,22 @@ $ curl -H'Content-Type: application/json' \
 
 ### maven
 
-#### Add the jcenter repo
-```xml
-<repositories>
-    <repository>
-        <snapshots>
-            <enabled>false</enabled>
-        </snapshots>
-        <id>central</id>
-        <name>bintray</name>
-        <url>http://jcenter.bintray.com</url>
-    </repository>
-</repositories>
-```
-
 #### Add kalfor dependency
 ```xml
 <dependencies>
     <dependency>
         <groupId>cc.vileda.kalfor</groupId>
         <artifactId>kalfor-library</artifactId>
-        <version>1.1.2</version>
+        <version>1.2.0</version>
     </dependency>
 </dependencies>
 ```
 
 ### gradle
 
-#### Add the bintray repo
-```groovy
-repositories {
-   jcenter()
-}
-```
-
 #### Add kalfor dependency
 ```groovy
-compile 'cc.vileda.kalfor:kalfor:1.1.2'
+compile 'cc.vileda.kalfor:kalfor:1.2.0'
 ```
 
 ## Use it
