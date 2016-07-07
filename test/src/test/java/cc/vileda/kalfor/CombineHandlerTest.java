@@ -12,6 +12,7 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.rxjava.core.RxHelper;
 import io.vertx.rxjava.core.Vertx;
+import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -114,6 +115,10 @@ public class CombineHandlerTest
 				.when()
 				.post("http://localhost:" + kalforPort + "/combine")
 				.then()
-				.statusCode(is(405));
+				.statusCode(is(HttpStatus.SC_BAD_REQUEST))
+				.body(containsString("{\n" +
+						"  \"error\" : [ \"object has missing required properties ([\\\"proxyBaseUrl\\\",\\\"proxyRequests\\\"])\", \"object has missing required " +
+						"properties ([\\\"proxyBaseUrl\\\",\\\"proxyRequests\\\"])\" ]\n" +
+						"}"));
 	}
 }

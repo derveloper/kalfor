@@ -1,35 +1,35 @@
 package cc.vileda.kalfor.handler;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.github.fge.jackson.JsonLoader;
+import com.github.fge.jsonschema.core.exceptions.ProcessingException;
+import com.github.fge.jsonschema.core.report.ProcessingReport;
+import com.github.fge.jsonschema.main.JsonSchema;
+import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.ext.web.RoutingContext;
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.ValidationException;
-import org.everit.json.schema.loader.SchemaLoader;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.HttpURLConnection;
 
 
 public class SchemaValidationHandler implements Handler<RoutingContext>
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SchemaValidationHandler.class);
-	private final Schema schema;
+	private final JsonSchema schema;
 
 	public SchemaValidationHandler()
 	{
-		try (InputStream inputStream = getClass().getResourceAsStream("/kalfor-schema.json")) {
-			final JSONObject rawSchema = new JSONObject(new JSONTokener(inputStream));
-			schema = SchemaLoader.load(rawSchema);
+		try {
+			schema = JsonSchemaFactory.byDefault().getJsonSchema("resource:/kalfor-schema.json");
 		}
-		catch (IOException e) {
-			LOGGER.error(e.getMessage(), e);
+		catch (ProcessingException e) {
+			LOGGER.error(e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -38,18 +38,24 @@ public class SchemaValidationHandler implements Handler<RoutingContext>
 	public void handle(final RoutingContext routingContext)
 	{
 		try {
-			schema.validate(new JSONArray(routingContext.getBodyAsString()));
-			routingContext.next();
-		} catch (final ValidationException validationException) {
-			final JsonObject error = new JsonObject().put("error", validationException.getMessage());
-			final JsonArray errorMessages = new JsonArray();
+			final ProcessingReport validate = schema.validate(JsonLoader.fromString(routingContext.getBodyAsString()));
+			if(validate.isSuccess()) {
+				routingContext.next();
+				return;
+			}
 
-			validationException.getCausingExceptions()
-					.forEach(e -> errorMessages.add(e.getPointerToViolation()));
-
-			error.put("problems", errorMessages);
+			final JsonArray messages = new JsonArray();
+			validate.forEach(processingMessage -> messages.add(processingMessage.getMessage()));
+			final JsonObject error = new JsonObject().put("error", messages);
 			routingContext.response()
-					.setStatusCode(405)
+					.setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST)
+					.end(error.encodePrettily());
+		}
+		catch (ProcessingException | IOException e) {
+			LOGGER.error(e);
+			final JsonObject error = new JsonObject().put("error", e.getMessage());
+			routingContext.response()
+					.setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST)
 					.end(error.encodePrettily());
 		}
 	}
