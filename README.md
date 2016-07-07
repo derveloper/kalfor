@@ -25,6 +25,96 @@ $ curl -H'Content-Type: application/json' \
 'https://kalfor.herokuapp.com/combine'
 ```
 
+## api
+
+### request schema
+
+The schema for a kalfor request
+```javascript
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "proxyBaseUrl": {
+        "type": "string"
+      },
+      "headers": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "value"
+          ]
+        }
+      },
+      "proxyRequests": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "key": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "path",
+            "key"
+          ]
+        }
+      }
+    },
+    "required": [
+      "proxyBaseUrl",
+      "proxyRequests"
+    ]
+  }
+}
+```
+
+A request with all current features
+```javascript
+[
+  {
+    "proxyBaseUrl": "https://api.github.com",
+    "proxyRequests": [
+      {
+        "path": "/",
+        "key": "github"
+      }
+    ]
+  },
+  {
+    "proxyBaseUrl": "https://api.spotify.com",
+    "headers": [
+      {
+        "name": "Authorization",
+        "value": "Bearer <YOUR_SPOTIFY_API_KEY>"
+      }
+    ],
+    "proxyRequests": [
+      {
+        "path": "/v1/me",
+        "key": "spotify"
+      }
+    ]
+  }
+]
+```
+
 ## installation
 
 ### maven
