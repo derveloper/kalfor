@@ -1,4 +1,4 @@
-package cc.vileda.kalfor;
+package cc.vileda.kalfor.handler;
 
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;

@@ -29,11 +29,8 @@
     </developers>
 
     <modules>
-        <module>combine-handler</module>
-        <module>verticle</module>
+        <module>handler</module>
         <module>core</module>
-        <module>library</module>
-        <module>test</module>
     </modules>
 
     <properties>
@@ -51,17 +48,7 @@
         <dependencies>
             <dependency>
                 <groupId>cc.vileda.kalfor</groupId>
-                <artifactId>kalfor-combine-handler</artifactId>
-                <version>1.2.2-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>cc.vileda.kalfor</groupId>
-                <artifactId>kalfor-library</artifactId>
-                <version>1.2.2-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>cc.vileda.kalfor</groupId>
-                <artifactId>kalfor-verticle</artifactId>
+                <artifactId>kalfor-handler</artifactId>
                 <version>1.2.2-SNAPSHOT</version>
             </dependency>
             <dependency>
@@ -88,6 +75,24 @@
                 <groupId>com.github.fge</groupId>
                 <artifactId>json-schema-validator</artifactId>
                 <version>2.2.6</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.12</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-unit</artifactId>
+                <version>3.3.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.rest-assured</groupId>
+                <artifactId>rest-assured</artifactId>
+                <version>3.0.0</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

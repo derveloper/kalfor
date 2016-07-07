@@ -1,7 +1,5 @@
-package cc.vileda.kalfor.verticle;
+package cc.vileda.kalfor.handler;
 
-import cc.vileda.kalfor.handler.CombineHandler;
-import cc.vileda.kalfor.handler.SchemaValidationHandler;
 import io.vertx.rxjava.core.AbstractVerticle;
 import io.vertx.rxjava.core.http.HttpServer;
 import io.vertx.rxjava.ext.web.Router;
@@ -9,18 +7,18 @@ import io.vertx.rxjava.ext.web.handler.BodyHandler;
 import io.vertx.rxjava.ext.web.handler.CorsHandler;
 
 
-public class KalforVerticle extends AbstractVerticle
+public class KalforTestVerticle extends AbstractVerticle
 {
 	private final int listenPort;
 	private HttpServer httpServer;
 
 	@SuppressWarnings("unused")
-	public KalforVerticle()
+	public KalforTestVerticle()
 	{
 		this(8080);
 	}
 
-	public KalforVerticle(final int listenPort)
+	public KalforTestVerticle(final int listenPort)
 	{
 		this.listenPort = listenPort;
 	}

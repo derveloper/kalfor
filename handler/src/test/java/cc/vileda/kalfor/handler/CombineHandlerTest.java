@@ -1,9 +1,6 @@
-package cc.vileda.kalfor;
+package cc.vileda.kalfor.handler;
 
-import cc.vileda.kalfor.handler.KalforProxyHeader;
-import cc.vileda.kalfor.handler.KalforProxyRequest;
-import cc.vileda.kalfor.handler.KalforRequest;
-import cc.vileda.kalfor.verticle.KalforVerticle;
+import io.restassured.RestAssured;
 import io.restassured.http.Header;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -13,6 +10,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.rxjava.core.RxHelper;
 import io.vertx.rxjava.core.Vertx;
 import org.apache.http.HttpStatus;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,11 +20,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Arrays;
 import java.util.Collections;
-
-import static io.restassured.RestAssured.get;
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
 
 
 @RunWith(VertxUnitRunner.class)
@@ -54,7 +47,7 @@ public class CombineHandlerTest
 		final Observable<String> deployVerticle = RxHelper.deployVerticle(vertx, new RestApiMock(remotePort));
 		final Observable<String> deployVerticle2 = RxHelper.deployVerticle(
 				vertx,
-				new KalforVerticle(kalforPort)
+				new KalforTestVerticle(kalforPort)
 		);
 		deployVerticle
 				.subscribe(s -> {
@@ -69,9 +62,9 @@ public class CombineHandlerTest
 	@Test
 	public void restApiMockShouldRespond()
 	{
-		get("http://localhost:" + remotePort + "/test")
+		RestAssured.get("http://localhost:" + remotePort + "/test")
 				.then()
-				.body(containsString(new JsonObject().put("foo", "bar").encodePrettily()));
+				.body(Matchers.containsString(new JsonObject().put("foo", "bar").encodePrettily()));
 	}
 
 	@Test
@@ -92,13 +85,13 @@ public class CombineHandlerTest
 				.put("firstKey", new JsonObject().put("foo", "bar"))
 				.put("secondKey", new JsonObject().put("foo", "bar"))
 				.encodePrettily();
-		given()
+		RestAssured.given()
 				.body(given)
 				.header(new Header("Content-Type", "application/json"))
 				.when()
 				.post("http://localhost:" + kalforPort + "/combine")
 				.then()
-				.body(containsString(expected));
+				.body(Matchers.containsString(expected));
 	}
 
 	@Test
@@ -109,14 +102,14 @@ public class CombineHandlerTest
 				new JsonObject().put("baz", new JsonObject().put("bar", "foo"))
 		)).encodePrettily();
 
-		given()
+		RestAssured.given()
 				.body(given)
 				.header(new Header("Content-Type", "application/json"))
 				.when()
 				.post("http://localhost:" + kalforPort + "/combine")
 				.then()
-				.statusCode(is(HttpStatus.SC_BAD_REQUEST))
-				.body(containsString("{\n" +
+				.statusCode(Matchers.is(HttpStatus.SC_BAD_REQUEST))
+				.body(Matchers.containsString("{\n" +
 						"  \"error\" : [ \"object has missing required properties ([\\\"proxyBaseUrl\\\",\\\"proxyRequests\\\"])\", \"object has missing required " +
 						"properties ([\\\"proxyBaseUrl\\\",\\\"proxyRequests\\\"])\" ]\n" +
 						"}"));
