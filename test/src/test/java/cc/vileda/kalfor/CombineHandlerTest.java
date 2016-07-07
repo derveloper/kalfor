@@ -25,6 +25,7 @@ import java.util.Collections;
 import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 
 
 @RunWith(VertxUnitRunner.class)
@@ -56,9 +57,9 @@ public class CombineHandlerTest
 		);
 		deployVerticle
 				.subscribe(s -> {
-					System.out.println(s);
+					System.out.println("deployed Api Mock "+s);
 					deployVerticle2.subscribe(s1 -> {
-						System.out.println(s1);
+						System.out.println("deployed Kalfor " + s1);
 						async.complete();
 					});
 				});
@@ -97,5 +98,22 @@ public class CombineHandlerTest
 				.post("http://localhost:" + kalforPort + "/combine")
 				.then()
 				.body(containsString(expected));
+	}
+
+	@Test
+	public void combineHandlerShouldRespondWithBadRequestOnInvalidRequest()
+	{
+		final String given = new JsonArray(Arrays.asList(
+				new JsonObject().put("foo", "bar"),
+				new JsonObject().put("baz", new JsonObject().put("bar", "foo"))
+		)).encodePrettily();
+
+		given()
+				.body(given)
+				.header(new Header("Content-Type", "application/json"))
+				.when()
+				.post("http://localhost:" + kalforPort + "/combine")
+				.then()
+				.statusCode(is(405));
 	}
 }

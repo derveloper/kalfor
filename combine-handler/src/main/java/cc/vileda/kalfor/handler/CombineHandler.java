@@ -5,13 +5,13 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rx.java.ObservableFuture;
 import io.vertx.rxjava.core.MultiMap;
 import io.vertx.rxjava.core.Vertx;
-import io.vertx.rxjava.core.buffer.Buffer;
 import io.vertx.rxjava.core.http.*;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import rx.Observable;
@@ -43,8 +43,8 @@ public class CombineHandler implements Handler<RoutingContext>
 		final HttpServerRequest request = event.request();
 		final HttpServerResponse response = event.response();
 
-		event.request()
-				.toObservable()
+
+		Observable.just(event.getBodyAsJsonArray())
 				.flatMap(this::transformRequest)
 				.flatMap(proxyRequest(request))
 				.timeout(5, TimeUnit.SECONDS)
@@ -54,7 +54,7 @@ public class CombineHandler implements Handler<RoutingContext>
 				.subscribe(sendResponse(request, response));
 	}
 
-	private Func1<KalforRequest, Observable<Context>> proxyRequest(HttpServerRequest request)
+	private Func1<KalforRequest, Observable<Context>> proxyRequest(final HttpServerRequest request)
 	{
 		return pair -> {
 			try {
@@ -143,10 +143,10 @@ public class CombineHandler implements Handler<RoutingContext>
 		};
 	}
 
-	private Observable<KalforRequest> transformRequest(final Buffer buffer)
+	private Observable<KalforRequest> transformRequest(final JsonArray requestArray)
 	{
-		LOGGER.debug("request body: {}", buffer.toString());
-		return Observable.from(buffer.toJsonArray()
+		LOGGER.debug("request body: {}", requestArray.encode());
+		return Observable.from(requestArray
 				.stream()
 				.map(object -> Json.decodeValue(((JsonObject) object).encode(), KalforRequest.class))
 				.collect(Collectors.toList()));
