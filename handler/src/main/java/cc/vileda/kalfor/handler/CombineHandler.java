@@ -1,6 +1,5 @@
 package cc.vileda.kalfor.handler;
 
-import cc.vileda.kalfor.core.Endpoint;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClientOptions;
@@ -10,12 +9,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rx.java.ObservableFuture;
-import io.vertx.rxjava.core.Future;
 import io.vertx.rxjava.core.MultiMap;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.rxjava.core.http.*;
-import io.vertx.rxjava.ext.web.Route;
-import io.vertx.rxjava.ext.web.Router;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import rx.Observable;
 import rx.functions.Action1;

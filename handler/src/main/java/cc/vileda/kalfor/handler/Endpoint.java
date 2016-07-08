@@ -1,4 +1,4 @@
-package cc.vileda.kalfor.core;
+package cc.vileda.kalfor.handler;
 
 import java.net.MalformedURLException;
 import java.net.URL;

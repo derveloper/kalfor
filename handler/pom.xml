@@ -11,10 +11,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>cc.vileda.kalfor</groupId>
-            <artifactId>kalfor-core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-rx-java</artifactId>
         </dependency>
