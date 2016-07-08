@@ -139,19 +139,38 @@ compile 'cc.vileda.kalfor:kalfor:1.2.1'
 
 ## Use it
 
-### create your main method
+### create your verticle
 
 ```java
-public class MyKalfor
+class KalforVerticle extends AbstractVerticle
 {
-	public static void main(String[] args)
+	private final int listenPort;
+	
+	KalforVerticle(final int listenPort)
 	{
-		new Kalfor().listen(8080);
+		this.listenPort = listenPort;
+	}
+
+	@Override
+	public void start() throws Exception
+	{
+		final HttpServer httpServer = vertx.createHttpServer();
+
+		final Router router = Router.router(vertx);
+		
+		// the kalfor handlers assumes that a BodyHandler is called beforehand
+		router.route().handler(BodyHandler.create());
+
+		router.post("/combine").handler(new SchemaValidationHandler());
+		router.post("/combine").handler(new CombineHandler(vertx));
+
+		httpServer.requestHandler(router::accept).listen(listenPort);
 	}
 }
 ```
 
-now run the main method in your IDE or build yourself a fat-jar.
+now deploy your vert.x verticle either by using the CLI or building a fat-jar.
+see the [vertx.io docs](http://vertx.io/docs/) for that.
 
 ### combine
 ```
@@ -181,10 +200,6 @@ $ curl -H'Content-Type: application/json' \
 '"proxyRequests":[{"path":"/v1/me", "key":"spotify"}]}]' \
 'http://localhost:8080/combine'
 ```
-
-### existing vert.x application
-if you already have a vert.x application, just grab the
-`kalfor-library` or `kalfor-combine-handler` maven module as a dependency.
 
 ## license
 ```

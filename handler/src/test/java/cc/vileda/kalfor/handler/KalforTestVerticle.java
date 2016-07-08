@@ -7,18 +7,11 @@ import io.vertx.rxjava.ext.web.handler.BodyHandler;
 import io.vertx.rxjava.ext.web.handler.CorsHandler;
 
 
-public class KalforTestVerticle extends AbstractVerticle
+class KalforTestVerticle extends AbstractVerticle
 {
 	private final int listenPort;
-	private HttpServer httpServer;
 
-	@SuppressWarnings("unused")
-	public KalforTestVerticle()
-	{
-		this(8080);
-	}
-
-	public KalforTestVerticle(final int listenPort)
+	KalforTestVerticle(final int listenPort)
 	{
 		this.listenPort = listenPort;
 	}
@@ -26,7 +19,7 @@ public class KalforTestVerticle extends AbstractVerticle
 	@Override
 	public void start() throws Exception
 	{
-		httpServer = vertx.createHttpServer();
+		final HttpServer httpServer = vertx.createHttpServer();
 
 		final Router router = Router.router(vertx);
 		router.route().handler(CorsHandler.create("*").allowedHeader("authorization"));
@@ -36,11 +29,5 @@ public class KalforTestVerticle extends AbstractVerticle
 		router.post("/combine").handler(new CombineHandler(vertx));
 
 		httpServer.requestHandler(router::accept).listen(listenPort);
-	}
-
-	@Override
-	public void stop() throws Exception
-	{
-		httpServer.close();
 	}
 }
