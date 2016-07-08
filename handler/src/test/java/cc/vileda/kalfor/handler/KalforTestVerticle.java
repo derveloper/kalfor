@@ -25,8 +25,8 @@ class KalforTestVerticle extends AbstractVerticle
 		router.route().handler(CorsHandler.create("*").allowedHeader("authorization"));
 		router.route().handler(BodyHandler.create());
 
-		router.post("/combine").handler(new SchemaValidationHandler());
-		router.post("/combine").handler(new CombineHandler(vertx));
+		router.route().handler(new SchemaValidationHandler());
+		router.route().handler(new CombineHandler(vertx));
 
 		httpServer.requestHandler(router::accept).listen(listenPort);
 	}
