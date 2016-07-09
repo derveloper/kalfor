@@ -2,7 +2,6 @@ package cc.vileda.kalfor.handler
 
 import java.net.MalformedURLException
 import java.net.URL
-import java.util.Objects
 
 
 class Endpoint @Throws(MalformedURLException::class)

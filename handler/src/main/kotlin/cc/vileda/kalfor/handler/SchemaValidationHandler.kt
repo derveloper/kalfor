@@ -2,16 +2,13 @@ package cc.vileda.kalfor.handler
 
 import com.github.fge.jackson.JsonLoader
 import com.github.fge.jsonschema.core.exceptions.ProcessingException
-import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.JsonSchema
 import com.github.fge.jsonschema.main.JsonSchemaFactory
 import io.vertx.core.Handler
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
-import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.rxjava.ext.web.RoutingContext
-
 import java.io.IOException
 import java.net.HttpURLConnection
 
@@ -38,7 +35,8 @@ class SchemaValidationHandler : Handler<RoutingContext> {
             }
 
             val messages = validate.fold(JsonArray()) {
-                jsonArray, processingMessage -> jsonArray.add(processingMessage.message)
+                jsonArray, processingMessage ->
+                jsonArray.add(processingMessage.message)
             }
             endWithBadRequest(JsonObject().put("error", messages), routingContext)
         } catch (e: ProcessingException) {
