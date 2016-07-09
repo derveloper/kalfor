@@ -206,11 +206,28 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>${project.basedir}/lib/empty-javadoc.jar</file>
+                                    <file>${highest-basedir}/lib/empty-javadoc.jar</file>
                                     <type>jar</type>
                                     <classifier>javadoc</classifier>
                                 </artifact>
                             </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.commonjava.maven.plugins</groupId>
+                <artifactId>directory-maven-plugin</artifactId>
+                <version>0.1</version>
+                <executions>
+                    <execution>
+                        <id>directories</id>
+                        <goals>
+                            <goal>highest-basedir</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <property>highest-basedir</property>
                         </configuration>
                     </execution>
                 </executions>
