@@ -37,20 +37,22 @@ class SchemaValidationHandler : Handler<RoutingContext> {
                 return
             }
 
-            val messages = JsonArray()
-            validate.forEach { processingMessage -> messages.add(processingMessage.message) }
-            val error = JsonObject().put("error", messages)
-            routingContext.response().setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST).end(error.encodePrettily())
+            val messages = validate.fold(JsonArray()) {
+                jsonArray, processingMessage -> jsonArray.add(processingMessage.message)
+            }
+            endWithBadRequest(JsonObject().put("error", messages), routingContext)
         } catch (e: ProcessingException) {
             LOGGER.error(e)
-            val error = JsonObject().put("error", e.message)
-            routingContext.response().setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST).end(error.encodePrettily())
+            endWithBadRequest(JsonObject().put("error", e.message), routingContext)
         } catch (e: IOException) {
             LOGGER.error(e)
-            val error = JsonObject().put("error", e.message)
-            routingContext.response().setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST).end(error.encodePrettily())
+            endWithBadRequest(JsonObject().put("error", e.message), routingContext)
         }
 
+    }
+
+    private fun endWithBadRequest(error: JsonObject, routingContext: RoutingContext) {
+        routingContext.response().setStatusCode(HttpURLConnection.HTTP_BAD_REQUEST).end(error.encodePrettily())
     }
 
     companion object {

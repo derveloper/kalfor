@@ -1,6 +1,7 @@
 package cc.vileda.kalfor.handler
 
 
+@Suppress("unused")
 class KalforRequest {
     var proxyBaseUrl: String = ""
 
