@@ -5,7 +5,7 @@
     <groupId>cc.vileda.kalfor</groupId>
     <artifactId>kalfor-parent</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.4-SNAPTSHOT</version>
+    <version>3.0.4</version>
 
     <name>kalfor</name>
     <description>
