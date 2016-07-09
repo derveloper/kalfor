@@ -7,23 +7,17 @@ import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
-import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.rx.java.ObservableFuture
-import io.vertx.rxjava.core.MultiMap
 import io.vertx.rxjava.core.Vertx
-import io.vertx.rxjava.core.http.*
+import io.vertx.rxjava.core.http.HttpClient
+import io.vertx.rxjava.core.http.HttpClientResponse
+import io.vertx.rxjava.core.http.HttpServerRequest
+import io.vertx.rxjava.core.http.HttpServerResponse
 import io.vertx.rxjava.ext.web.RoutingContext
 import rx.Observable
-import rx.functions.Action1
-import rx.functions.Func1
-
 import java.net.MalformedURLException
-import java.util.Optional
 import java.util.concurrent.TimeUnit
-import java.util.stream.Collectors
-
-import java.util.Collections.emptyList
 
 
 class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
@@ -33,28 +27,48 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
         val response = event.response()
 
         Observable.just(event.bodyAsJsonArray)
-                .flatMap { this.transformRequest(it) }
+                .flatMap { transformRequest(it) }
                 .flatMap({ makeRequests(it, request) })
                 .timeout(5, TimeUnit.SECONDS)
-                .reduce(JsonObject(), { entries, context -> this.aggregateResponse(entries, context) })
+                .reduce(JsonObject(), aggregateResponse())
                 .doOnError { it.printStackTrace() }
                 .onErrorReturn { throwable -> JsonObject() }
-                .subscribe({ response.putHeader("content-type", request.getHeader("content-type")).end(it.encodePrettily()) })
+                .subscribe(respondToClient(request, response))
+    }
+
+    private fun aggregateResponse(): (JsonObject, Context) -> JsonObject = { entries, context ->
+        val path = context.name
+        val body = context.buffer.toString()
+
+        LOGGER.debug("response body: {}", body)
+
+        if (body.trim { it <= ' ' }.startsWith("{"))
+            entries.put(path, JsonObject(body))
+        else
+            entries
+    }
+
+    private fun respondToClient(request: HttpServerRequest, response: HttpServerResponse): (JsonObject) -> Unit = {
+        response.putHeader("content-type", request.getHeader("content-type")).end(it.encodePrettily())
     }
 
     private fun makeRequests(it: KalforRequest, request: HttpServerRequest): Observable<Context>? {
         return try {
-            val endpoint = Endpoint(it.proxyBaseUrl)
-            val httpClient = getHttpClient(endpoint)
-
-            removeRequestHeaders(request)
-
-            Observable.from<KalforProxyRequest>(it.proxyRequests)
-                    .flatMap(makeSingleRequest(endpoint, it.headers, httpClient, request))
-                    .doOnUnsubscribe({ httpClient.close() })
+            proxyRequest(it, request)
         } catch (e: MalformedURLException) {
             Observable.error<Context>(e)
         }
+    }
+
+    private fun proxyRequest(it: KalforRequest, request: HttpServerRequest): Observable<Context>? {
+        val endpoint = Endpoint(it.proxyBaseUrl)
+        val httpClient = getHttpClient(endpoint)
+
+        removeRequestHeaders(request)
+
+        return Observable.from<KalforProxyRequest>(it.proxyRequests)
+                .flatMap(makeSingleRequest(endpoint, it.headers, httpClient, request))
+                .doOnUnsubscribe({ httpClient.close() })
     }
 
     private fun makeSingleRequest(endpoint: Endpoint,
@@ -118,18 +132,6 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
         LOGGER.debug("request body: {}", requestArray.encode())
         return Observable.from(requestArray.map({ `object` ->
             Json.decodeValue((`object` as JsonObject).encode(), KalforRequest::class.java) }))
-    }
-
-    private fun aggregateResponse(entries: JsonObject, context: Context): JsonObject {
-        val path = context.name
-        val body = context.buffer.toString()
-
-        LOGGER.debug("response body: {}", body)
-
-        return if (body.trim { it <= ' ' }.startsWith("{"))
-            entries.put(path, JsonObject(body))
-        else
-            entries
     }
 
     companion object {
