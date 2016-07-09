@@ -66,12 +66,11 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
         return {
             val observableFuture = ObservableFuture<Context>()
 
-            val key = it.key
             val httpClientRequest = httpClient.get(
                     endpoint.port(),
                     endpoint.host(),
                     it.path,
-                    handleResponse(key, observableFuture))
+                    handleResponse(it.key, observableFuture))
 
             headers?.forEach { header ->
                 httpClientRequest.putHeader(header.name, header.value)
