@@ -124,8 +124,8 @@ A request with all current features
 <dependencies>
     <dependency>
         <groupId>cc.vileda.kalfor</groupId>
-        <artifactId>kalfor-library</artifactId>
-        <version>2.0.0</version>
+        <artifactId>kalfor-handler</artifactId>
+        <version>3.0.0</version>
     </dependency>
 </dependencies>
 ```
@@ -134,7 +134,7 @@ A request with all current features
 
 #### Add kalfor dependency
 ```groovy
-compile 'cc.vileda.kalfor:kalfor:2.0.0'
+compile 'cc.vileda.kalfor:kalfor-handler:3.0.0'
 ```
 
 ## Use it
