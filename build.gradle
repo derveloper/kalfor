@@ -62,7 +62,7 @@ subprojects {
         archives sourcesJar
     }
     signing {
-        required { gradle.taskGraph.hasTask(tasks.release) }
+        required { gradle.taskGraph.hasTask(tasks.uploadArchives) }
         sign configurations.archives
     }
 
