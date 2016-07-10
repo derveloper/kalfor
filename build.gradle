@@ -71,6 +71,7 @@ subprojects {
             archives sourcesJar
         }
         signing {
+            required { gradle.taskGraph.hasTask(tasks.uploadArchives) }
             sign configurations.archives
         }
 
@@ -79,73 +80,75 @@ subprojects {
         }
     }
 
-    uploadArchives {
+    if(project.hasProperty('sonatypeUsername')) {
+        uploadArchives {
 
-        if (!pomOnlyProject) {
-            dependsOn releaseSub
-        }
-
-        repositories.mavenDeployer {
             if (!pomOnlyProject) {
-                configuration = configurations.archives
+                dependsOn releaseSub
             }
 
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-                authentication(userName: sonatypeUsr, password: sonatypePwd)
-            }
-
-            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots') {
-                authentication(userName: sonatypeUsr, password: sonatypePwd)
-            }
-
-            pom.whenConfigured { configgedPom ->
-                configgedPom.dependencies.removeAll { dep ->
-                    dep.scope == "test"
+            repositories.mavenDeployer {
+                if (!pomOnlyProject) {
+                    configuration = configurations.archives
                 }
 
-                configgedPom.dependencies = configgedPom.dependencies.sort { dep ->
-                    "$dep.scope:$dep.groupId:$dep.artifactId"
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+                    authentication(userName: sonatypeUsr, password: sonatypePwd)
                 }
 
-                configgedPom.project {
-                    name project.name
-                    packaging(pomOnlyProject ? 'pom' : 'jar')
-                    description project.description
-                    url 'https://github.com/vileda/kalfor'
-                    inceptionYear '2016'
+                snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots') {
+                    authentication(userName: sonatypeUsr, password: sonatypePwd)
+                }
 
-                    scm {
+                pom.whenConfigured { configgedPom ->
+                    configgedPom.dependencies.removeAll { dep ->
+                        dep.scope == "test"
+                    }
+
+                    configgedPom.dependencies = configgedPom.dependencies.sort { dep ->
+                        "$dep.scope:$dep.groupId:$dep.artifactId"
+                    }
+
+                    configgedPom.project {
+                        name project.name
+                        packaging(pomOnlyProject ? 'pom' : 'jar')
+                        description project.description
                         url 'https://github.com/vileda/kalfor'
-                        connection 'scm:git:git@github.com:vileda/kalfor.git'
-                    }
+                        inceptionYear '2016'
 
-                    licenses {
-                        license {
-                            name 'Apache-2.0 License'
-                            url 'http://www.apache.org/licenses/LICENSE-2.0'
-                            distribution 'repo'
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            id 'vileda'
-                            name 'Tristan Leo'
-                            email 'vileda+kalfor@vileda.cc'
+                        scm {
                             url 'https://github.com/vileda/kalfor'
+                            connection 'scm:git:git@github.com:vileda/kalfor.git'
                         }
-                    }
 
-                    issueManagement {
-                        system = "GitHub"
-                        url = "https://github.com/vileda/kalfor/issues"
+                        licenses {
+                            license {
+                                name 'Apache-2.0 License'
+                                url 'http://www.apache.org/licenses/LICENSE-2.0'
+                                distribution 'repo'
+                            }
+                        }
+
+                        developers {
+                            developer {
+                                id 'vileda'
+                                name 'Tristan Leo'
+                                email 'vileda+kalfor@vileda.cc'
+                                url 'https://github.com/vileda/kalfor'
+                            }
+                        }
+
+                        issueManagement {
+                            system = "GitHub"
+                            url = "https://github.com/vileda/kalfor/issues"
+                        }
                     }
                 }
-            }
 
+            }
         }
     }
 }
