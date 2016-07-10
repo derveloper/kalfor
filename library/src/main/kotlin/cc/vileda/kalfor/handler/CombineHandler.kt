@@ -31,6 +31,7 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
 
     private fun parseRequest(routingContext: RoutingContext): Observable<KalforRequest> {
         return Observable.from(routingContext.bodyAsJsonArray)
+                .onErrorReturn { Observable.empty<KalforRequest>() }
                 .filter { it is JsonObject }
                 .map { it as JsonObject }
                 .map { Json.decodeValue(it.encode(), KalforRequest::class.java) }
@@ -43,7 +44,7 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
         removeRequestHeaders(request)
 
         return Observable.from<KalforProxyRequest>(kalforRequest.proxyRequests)
-                .flatMap(makeSingleRequest(endpoint, kalforRequest.headers, httpClient, request))
+                .flatMap(makeSingleRequest(endpoint, kalforRequest.headers!!, httpClient, request))
                 .doOnUnsubscribe({ httpClient.close() })
     }
 
@@ -59,21 +60,50 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
             jsonResponse
     }
 
-    private fun respondToClient(serverRequest: HttpServerRequest, serverResponse: HttpServerResponse): (JsonObject) -> Unit = {
+    private fun respondToClient(
+            serverRequest: HttpServerRequest,
+            serverResponse: HttpServerResponse
+    ): (JsonObject) -> Unit = {
         serverResponse.putHeader("content-type", serverRequest.getHeader("content-type")).end(it.encodePrettily())
     }
 
     private fun makeSingleRequest(
             endpoint: Endpoint,
-            headers: List<KalforProxyHeader>?,
+            headers: List<KalforProxyHeader>,
             httpClient: HttpClient,
             request: HttpServerRequest
     ): (KalforProxyRequest) -> ObservableFuture<Context> = {
         val observableFuture = ObservableFuture<Context>()
 
-        val httpClientRequest = buildHttpClientRequest(endpoint, httpClient, it, observableFuture)
+        buildHttpClientRequest(
+                endpoint,
+                httpClient,
+                it,
+                observableFuture,
+                headers,
+                request
+        ).end()
 
-        headers?.forEach { header ->
+        observableFuture
+    }
+
+    private fun buildHttpClientRequest(
+            endpoint: Endpoint,
+            httpClient: HttpClient,
+            kalforRequest: KalforProxyRequest,
+            observableFuture: ObservableFuture<Context>,
+            headers: List<KalforProxyHeader>,
+            request: HttpServerRequest
+    ): HttpClientRequest
+    {
+        @Suppress("ReplaceGetOrSet")
+        val httpClientRequest = httpClient.get(
+                endpoint.port(),
+                endpoint.host(),
+                kalforRequest.path,
+                handleResponse(kalforRequest.key, observableFuture))
+        httpClientRequest.exceptionHandler { it.printStackTrace() }
+        headers.forEach { header ->
             httpClientRequest
                     .putHeader(header.name, header.value)
                     .headers().remove(header.name)
@@ -85,24 +115,6 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
         httpClientRequest
                 .headers()
                 .addAll(request.headers())
-        httpClientRequest.end()
-
-        observableFuture
-    }
-
-    private fun buildHttpClientRequest(
-            endpoint: Endpoint,
-            httpClient: HttpClient,
-            kalforRequest: KalforProxyRequest,
-            observableFuture: ObservableFuture<Context>): HttpClientRequest
-    {
-        @Suppress("ReplaceGetOrSet")
-        val httpClientRequest = httpClient.get(
-                endpoint.port(),
-                endpoint.host(),
-                kalforRequest.path,
-                handleResponse(kalforRequest.key, observableFuture))
-        httpClientRequest.exceptionHandler { it.printStackTrace() }
         return httpClientRequest
     }
 
