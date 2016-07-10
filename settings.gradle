@@ -1,0 +1,13 @@
+rootProject.name = 'kalfor'
+include 'sample'
+include 'library'
+
+rootProject.children.each { project ->
+    String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
+    String projectDirName = "$projectFileName"
+    project.projectDir = new File(settingsDir, projectDirName)
+    project.buildFileName = "${projectFileName}.gradle"
+}
+
+project(':sample').name = 'kalfor-sample'
+project(':library').name = 'kalfor-library'

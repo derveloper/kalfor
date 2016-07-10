@@ -1,0 +1,169 @@
+group 'cc.vileda.kalfor'
+version '3.0.7'
+
+buildscript {
+    ext.kotlinVersion = '1.0.3'
+    ext.extraConfVersion = '2.2.+'
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "com.netflix.nebula:gradle-extra-configurations-plugin:$extraConfVersion"
+    }
+}
+
+allprojects {
+    ext {
+        appVersion = '3.0.7'
+        appGroup = 'cc.vileda.kalfor'
+
+
+        junitVersion = '4.12'
+
+        sonatypeUsr = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
+        sonatypePwd = project.hasProperty('sonatypePassword') ? sonatypePassword : ''
+    }
+}
+
+subprojects {
+    repositories {
+        mavenCentral()
+    }
+
+    def pomOnlyProject = project.name == "kalfor"
+
+    apply plugin: 'optional-base'
+    apply plugin: 'provided-base'
+    apply plugin: 'kotlin'
+    apply plugin: 'maven'
+    apply plugin: 'signing'
+
+    compileJava {
+        sourceCompatibility = "1.6"
+        targetCompatibility = "1.6"
+    }
+
+    dependencies {
+        compile "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
+
+        testCompile "junit:junit:${junitVersion}"
+        testCompile "org.jetbrains.kotlin:kotlin-test:${kotlinVersion}"
+    }
+
+    if (pomOnlyProject) {
+        artifacts {}
+    } else {
+        task javadocJar(type: Jar) {
+            classifier = 'javadoc'
+            from javadoc
+        }
+
+        task sourcesJar(type: Jar) {
+            classifier = 'sources'
+            from sourceSets.main.allSource
+        }
+
+        artifacts {
+            archives jar
+            archives javadocJar
+            archives sourcesJar
+        }
+        signing {
+            sign configurations.archives
+        }
+
+        task releaseSub {
+            dependsOn signArchives
+        }
+    }
+
+    uploadArchives {
+
+        if (!pomOnlyProject) {
+            dependsOn releaseSub
+        }
+
+        repositories.mavenDeployer {
+            if (!pomOnlyProject) {
+                configuration = configurations.archives
+            }
+
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+                authentication(userName: sonatypeUsr, password: sonatypePwd)
+            }
+
+            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots') {
+                authentication(userName: sonatypeUsr, password: sonatypePwd)
+            }
+
+            pom.whenConfigured { configgedPom ->
+                configgedPom.dependencies.removeAll { dep ->
+                    dep.scope == "test"
+                }
+
+                configgedPom.dependencies = configgedPom.dependencies.sort { dep ->
+                    "$dep.scope:$dep.groupId:$dep.artifactId"
+                }
+
+                configgedPom.project {
+                    name project.name
+                    packaging(pomOnlyProject ? 'pom' : 'jar')
+                    description project.description
+                    url 'https://github.com/vileda/kalfor'
+                    inceptionYear '2016'
+
+                    scm {
+                        url 'https://github.com/vileda/kalfor'
+                        connection 'scm:git:git@github.com:vileda/kalfor.git'
+                    }
+
+                    licenses {
+                        license {
+                            name 'Apache-2.0 License'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0'
+                            distribution 'repo'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'vileda'
+                            name 'Tristan Leo'
+                            email 'vileda+kalfor@vileda.cc'
+                            url 'https://github.com/vileda/kalfor'
+                        }
+                    }
+
+                    issueManagement {
+                        system = "GitHub"
+                        url = "https://github.com/vileda/kalfor/issues"
+                    }
+                }
+            }
+
+        }
+    }
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+    allprojects*.version = appVersion
+    allprojects*.group = appGroup
+}
+
+task jars() {
+    dependsOn subprojects.findAll { it.name != 'kalfor' }.jar
+    dependsOn subprojects.findAll { it.name != 'kalfor' }.sourcesJar
+    dependsOn subprojects.findAll { it.name != 'kalfor' }.javadocJar
+}
+
+task release() {
+    dependsOn subprojects.uploadArchives
+}
+
+
+defaultTasks 'clean', 'jars'
