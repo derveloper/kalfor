@@ -4,24 +4,6 @@
 
 kalfor combines HTTP requests.
 
-- [kalfor](#kalfor)
-  * [what?](#what)
-  * [why](#why)
-  * [demo instance](#demo-instance)
-    + [try it yourself](#try-it-yourself)
-  * [api](#api)
-    + [request schema](#request-schema)
-  * [installation](#installation)
-    + [maven](#maven)
-      - [Add kalfor dependency](#add-kalfor-dependency)
-    + [gradle](#gradle)
-      - [Add kalfor dependency](#add-kalfor-dependency-1)
-  * [Use it](#use-it)
-    + [create your verticle](#create-your-verticle)
-    + [combine](#combine)
-      - [headers](#headers)
-  * [license](#license)
-
 ## what?
 kalfor transforms a single HTTP `POST` request to multiple parallel HTTP `GET` requests to a given HTTP backend
 which then are combined and send back to the client in a single JSON response.
