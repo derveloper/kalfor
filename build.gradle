@@ -21,9 +21,6 @@ allprojects {
 
 
         junitVersion = '4.12'
-
-        sonatypeUsr = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
-        sonatypePwd = project.hasProperty('sonatypePassword') ? sonatypePassword : ''
     }
 }
 
@@ -34,8 +31,6 @@ subprojects {
 
     def pomOnlyProject = project.name == "kalfor"
 
-    apply plugin: 'optional-base'
-    apply plugin: 'provided-base'
     apply plugin: 'kotlin'
     apply plugin: 'maven'
     apply plugin: 'signing'
@@ -80,7 +75,10 @@ subprojects {
         }
     }
 
-    if(project.hasProperty('sonatypeUsername')) {
+    if(hasProperty('sonatypeUsername')) {
+        apply plugin: 'optional-base'
+        apply plugin: 'provided-base'
+
         uploadArchives {
 
             if (!pomOnlyProject) {
@@ -96,11 +94,11 @@ subprojects {
 
 
                 repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-                    authentication(userName: sonatypeUsr, password: sonatypePwd)
+                    authentication(userName: getProperty('sonatypeUsername').toString(), password: getProperty('sonatypePassword').toString())
                 }
 
                 snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots') {
-                    authentication(userName: sonatypeUsr, password: sonatypePwd)
+                    authentication(userName: getProperty('sonatypeUsername').toString(), password: getProperty('sonatypePassword').toString())
                 }
 
                 pom.whenConfigured { configgedPom ->
@@ -164,10 +162,8 @@ task jars() {
     dependsOn subprojects.findAll { it.name != 'kalfor' }.javadocJar
 }
 
-if(project.hasProperty('sonatypeUsername')) {
-    task release() {
-        dependsOn subprojects.uploadArchives
-    }
+task release() {
+    dependsOn subprojects.uploadArchives
 }
 
 defaultTasks 'clean', 'jars'
