@@ -1,5 +1,5 @@
 group 'cc.vileda.kalfor'
-version '3.0.8'
+version '3.0.9'
 
 buildscript {
     ext.kotlinVersion = '1.0.3'
@@ -16,7 +16,7 @@ buildscript {
 
 allprojects {
     ext {
-        appVersion = '3.0.8'
+        appVersion = '3.0.9'
         appGroup = 'cc.vileda.kalfor'
 
 
