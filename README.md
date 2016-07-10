@@ -1,6 +1,6 @@
 # kalfor
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/cc.vileda.kalfor/kalfor/badge.svg)](https://maven-badges.herokuapp.com/maven-central/cc.vileda.kalfor/kalfor)
-[![Build Status](https://travis-ci.org/vileda/kalfor-java.svg?branch=master)](https://travis-ci.org/vileda/kalfor-java)
+[![Build Status](https://travis-ci.org/vileda/kalfor.svg?branch=master)](https://travis-ci.org/vileda/kalfor)
 
 kalfor combines HTTP requests.
 
