@@ -25,6 +25,9 @@ allprojects {
 }
 
 subprojects {
+    group 'cc.vileda.kalfor'
+    version '3.0.9'
+
     repositories {
         mavenCentral()
     }
