@@ -2,7 +2,7 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/cc.vileda.kalfor/kalfor-library/badge.svg)](https://maven-badges.herokuapp.com/maven-central/cc.vileda.kalfor/kalfor-library)
 [![Build Status](https://travis-ci.org/vileda/kalfor.svg?branch=master)](https://travis-ci.org/vileda/kalfor)
 
-kalfor is a HTTP multiplexer
+kalfor is a HTTP multiplexer microservice
 
 ## what?
 kalfor transforms a single HTTP `POST` request to multiple parallel HTTP `GET` requests to a given HTTP backend
@@ -10,8 +10,8 @@ which then are combined and send back to the client in a single JSON response.
 
 ## why
 while developing frontends for REST APIs you'll face performance problems because you have to make too many requests.
-with kalfor you can combine all your REST Calls into a single `POST` request. kalfor will fetch each endpoint in parallel for you and
-and respond all API responses in a single JSON to you.
+with kalfor you can combine all your REST Calls into a single `POST` request.
+kalfor will fetch each endpoint in parallel for you and and respond all API responses in a single JSON to you.
 
 ## demo instance
 
