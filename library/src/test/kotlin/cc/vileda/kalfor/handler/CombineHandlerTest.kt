@@ -15,7 +15,6 @@ import org.hamcrest.Matchers
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.IOException
 import java.net.ServerSocket
 import java.util.*
 

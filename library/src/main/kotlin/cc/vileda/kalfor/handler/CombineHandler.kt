@@ -44,7 +44,7 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
         removeRequestHeaders(request)
 
         return Observable.from<KalforProxyRequest>(kalforRequest.proxyRequests)
-                .flatMap(makeSingleRequest(endpoint, kalforRequest.headers!!, httpClient, request))
+                .flatMap(makeSingleRequest(endpoint, kalforRequest.headers, httpClient, request))
                 .doOnUnsubscribe({ httpClient.close() })
     }
 
@@ -69,7 +69,7 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
 
     private fun makeSingleRequest(
             endpoint: Endpoint,
-            headers: List<KalforProxyHeader>,
+            headers: List<KalforProxyHeader>?,
             httpClient: HttpClient,
             request: HttpServerRequest
     ): (KalforProxyRequest) -> ObservableFuture<Context> = {
@@ -92,7 +92,7 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
             httpClient: HttpClient,
             kalforRequest: KalforProxyRequest,
             observableFuture: ObservableFuture<Context>,
-            headers: List<KalforProxyHeader>,
+            headers: List<KalforProxyHeader>?,
             request: HttpServerRequest
     ): HttpClientRequest
     {
@@ -103,7 +103,7 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
                 kalforRequest.path,
                 handleResponse(kalforRequest.key, observableFuture))
         httpClientRequest.exceptionHandler { it.printStackTrace() }
-        headers.forEach { header ->
+        headers?.forEach { header ->
             httpClientRequest
                     .putHeader(header.name, header.value)
                     .headers().remove(header.name)
