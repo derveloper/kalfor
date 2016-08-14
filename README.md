@@ -1,6 +1,6 @@
 # kalfor
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/cc.vileda.kalfor/kalfor-library/badge.svg)](https://maven-badges.herokuapp.com/maven-central/cc.vileda.kalfor/kalfor-library)
-[![Build Status](https://travis-ci.org/vileda/kalfor.svg?branch=master)](https://travis-ci.org/vileda/kalfor)
+[![Build Status](https://travis-ci.org/derveloper/kalfor.svg?branch=master)](https://travis-ci.org/derveloper/kalfor)
 
 kalfor is a HTTP multiplexer microservice
 
@@ -22,7 +22,7 @@ You can find the demo instance at https://kalfor.herokuapp.com/combine
 $ curl -H'Content-Type: application/json' \
 --data '[{"proxyBaseUrl":"https://api.github.com", "proxyRequests":[{"path":"/", "key":"github"}]},'\
 '{"proxyBaseUrl":"https://api.spotify.com", "proxyRequests":[{"path":"/v1", "key":"spotify"}]}]' \
-'https://kalfor.herokuapp.com/combine'
+'https://kalfor.app.vileda.cc/combine'
 ```
 
 ## api
