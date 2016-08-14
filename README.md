@@ -15,7 +15,7 @@ kalfor will fetch each endpoint in parallel for you and and respond all API resp
 
 ## demo instance
 
-You can find the demo instance at https://kalfor.herokuapp.com/combine
+You can find the demo instance at https://kalfor.app.vileda.cc/combine
 
 ### try it yourself
 ```
