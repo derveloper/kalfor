@@ -1,16 +1,10 @@
 package cc.vileda.kalfor.handler
 
-import java.net.MalformedURLException
 import java.net.URL
 
 
-class Endpoint @Throws(MalformedURLException::class)
-constructor(baseUrl: String) {
+class Endpoint(baseUrl: String) {
     private val parsed: URL
-
-    init {
-        this.parsed = URL(baseUrl)
-    }
 
     val isSSL: Boolean?
         get() = "https" == scheme()
@@ -29,5 +23,9 @@ constructor(baseUrl: String) {
         } else {
             return parsed.port
         }
+    }
+
+    init {
+        this.parsed = URL(baseUrl)
     }
 }
