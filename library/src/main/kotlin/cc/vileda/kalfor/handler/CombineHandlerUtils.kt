@@ -28,7 +28,7 @@ fun proxyRequest(kalforRequest: KalforRequest, request: HttpServerRequest, vertx
 
     removeRequestHeaders(request)
 
-    return Observable.from<KalforProxyRequest>(kalforRequest.proxyRequests)
+    return Observable.from(kalforRequest.proxyRequests)
             .flatMap(makeSingleRequest(endpoint, kalforRequest.headers, httpClient, request))
             .doOnUnsubscribe({ httpClient.close() })
 }
@@ -45,7 +45,7 @@ fun aggregateResponse(): (JsonObject, Context) -> JsonObject = { jsonResponse, c
         jsonResponse
 }
 
-private fun respondToClient(
+fun respondToClient(
         serverRequest: HttpServerRequest,
         serverResponse: HttpServerResponse
 ): (JsonObject) -> Unit = {
