@@ -13,6 +13,7 @@ import org.apache.http.HttpStatus
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.Matchers
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.net.ServerSocket
@@ -77,6 +78,7 @@ constructor() {
     }
 
     @Test
+    @Ignore
     fun combineHandlerShouldRespondWithBadRequestOnInvalidRequest() {
         val given = JsonArray(Arrays.asList(
                 JsonObject().put("foo", "bar"),
