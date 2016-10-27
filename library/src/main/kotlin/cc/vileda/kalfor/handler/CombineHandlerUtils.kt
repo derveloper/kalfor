@@ -33,8 +33,9 @@ fun proxyRequest(kalforRequest: KalforRequest, request: HttpServerRequest, vertx
             .doOnUnsubscribe({ httpClient.close() })
 }
 
-fun aggregateResponse(): (JsonObject, Context) -> JsonObject = { jsonResponse, (path, buffer) ->
-    val body = buffer.toString()
+fun aggregateResponse(): (JsonObject, Context) -> JsonObject = { jsonResponse, context ->
+    val path = context.name
+    val body = context.buffer.toString()
 
     LOGGER.debug("serverResponse body: {}", body)
 
@@ -44,7 +45,7 @@ fun aggregateResponse(): (JsonObject, Context) -> JsonObject = { jsonResponse, (
         jsonResponse
 }
 
-fun respondToClient(
+private fun respondToClient(
         serverRequest: HttpServerRequest,
         serverResponse: HttpServerResponse
 ): (JsonObject) -> Unit = {
