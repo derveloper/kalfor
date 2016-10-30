@@ -1,10 +1,9 @@
 package cc.vileda.kalfor.handler
 
 import io.vertx.core.Handler
-import io.vertx.core.json.JsonObject
 import io.vertx.rxjava.core.Vertx
 import io.vertx.rxjava.ext.web.RoutingContext
-import java.util.concurrent.TimeUnit
+import rx.Observable
 
 
 class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
@@ -12,12 +11,17 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
         val request = routingContext.request()
         val response = routingContext.response()
 
-        parseRequest(routingContext)
-                .flatMap({ proxyRequest(it, request, vertx) })
-                .timeout(5, TimeUnit.SECONDS)
-                .reduce(JsonObject(), aggregateResponse())
+        Observable.from(parseRequest(routingContext, vertx))
+                .doOnEach(::println)
                 .doOnError { it.printStackTrace() }
-                .onErrorReturn { throwable -> JsonObject() }
+                .map(::convertResponseStrategy)
+                .onErrorReturn { throwable -> Observable.empty() }
+                .doOnError { it.printStackTrace() }
+                .flatMap { it }
+                .reduce("", aggregateResponse())
+                .doOnError { it.printStackTrace() }
+                .onErrorReturn { "" }
+                .defaultIfEmpty("")
                 .subscribe(respondToClient(request, response))
     }
 }

@@ -14,7 +14,7 @@ internal class KalforTestVerticle(private val listenPort: Int) : AbstractVerticl
         router.route().handler(CorsHandler.create("*").allowedHeader("authorization"))
         router.route().handler(BodyHandler.create())
 
-        router.route().handler(SchemaValidationHandler())
+        router.post().handler(SchemaValidationHandler())
         router.route().handler(CombineHandler(vertx))
 
         httpServer.requestHandler({ router.accept(it) }).listen(listenPort)
