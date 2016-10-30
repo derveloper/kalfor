@@ -29,64 +29,80 @@ fun parseRequest(routingContext: RoutingContext, vertx: Vertx): Observable<Respo
             .doOnError { it.printStackTrace() }
 }
 
-fun aggregateResponse() = { t1: String, t2: ResponseContext ->
-    if (t2.method == HttpMethod.POST) {
-        val body = JsonObject(t2.body)
-        val jsonObject = if (t1 == "") JsonObject() else JsonObject(t1)
-        val key = body.fieldNames().first()
-        JsonObject(TreeMap(jsonObject.put(key, body.getJsonObject(key)).map)).encodePrettily()
-    } else {
-        t1.plus("\n${t2.body}")
+fun aggregateResponseStrategy() = { last: String, ctx: ResponseContext ->
+    when (ctx.method) {
+        HttpMethod.POST -> aggregateJsonResponse(last, ctx)
+        else -> aggregatePlainTextResponse(last, ctx)
     }
 }
 
+private fun aggregatePlainTextResponse(last: String, ctx: ResponseContext) = last.plus("\n${ctx.body}")
+
+private fun aggregateJsonResponse(last: String, ctx: ResponseContext): String {
+    val body = JsonObject(ctx.body)
+    val jsonObject = if (last == "") JsonObject() else JsonObject(last)
+    val key = body.fieldNames().first()
+    return JsonObject(TreeMap(jsonObject.put(key, body.getJsonObject(key)).map)).encodePrettily()
+}
+
 fun convertResponseStrategy(resp: ResponseContext): Observable<ResponseContext>? {
-    return if (resp.method == HttpMethod.POST) {
-        resp.bufferObservable.map {
-            val jsonObject = JsonObject(it.toString(Charsets.UTF_8.name()))
-            resp.body = JsonObject().put(resp.key, jsonObject).encodePrettily()
-            println("converted json ${resp.body}")
-            resp
-        }
-    } else {
-        resp.bufferObservable.map {
-            resp.body = it.toString(Charsets.UTF_8.name())
-            println("converted text ${resp.body}")
-            resp
-        }
+    return when (resp.method) {
+        HttpMethod.POST -> convertResponseToJson(resp)
+        else -> convertResponseToPlainText(resp)
+    }
+}
+
+private fun convertResponseToJson(resp: ResponseContext): Observable<ResponseContext>? {
+    return resp.bufferObservable.map {
+        val jsonObject = JsonObject(it.toString(Charsets.UTF_8.name()))
+        resp.body = JsonObject().put(resp.key, jsonObject).encodePrettily()
+        println("converted json ${resp.body}")
+        resp
+    }
+}
+
+private fun convertResponseToPlainText(resp: ResponseContext): Observable<ResponseContext>? {
+    return resp.bufferObservable.map {
+        resp.body = it.toString(Charsets.UTF_8.name())
+        println("converted text ${resp.body}")
+        resp
     }
 }
 
 private fun parseRequestStrategy(routingContext: RoutingContext): List<KalforRequest> {
-    val newHeaders = MultiMap.caseInsensitiveMultiMap()
-    val headers = routingContext.request().headers()
-    headers.names().forEach {
-        if (it.startsWith("x-", true)) {
-            newHeaders.add(it, headers.get(it))
-        }
-    }
+    val newHeaders = filterHeaders(routingContext)
 
     val proxyHeaders = convertMultiMapToProxyHeaders(newHeaders)
 
-    if (routingContext.request().method() == HttpMethod.GET) {
-        return routingContext.request().params().getAll("c")
-                .map {
-                    val url = URI(URLDecoder.decode(it, Charsets.UTF_8.name()))
-                    KalforRequest("${url.scheme}://${url.host}:${url.port}", proxyHeaders, listOf(KalforProxyRequest("unused", url.rawPath)), HttpMethod.GET)
-                }
-    }
-    else if (routingContext.request().method() == HttpMethod.POST) {
-        return routingContext.bodyAsJsonArray
+    return when (routingContext.request().method()) {
+        HttpMethod.POST -> routingContext.bodyAsJsonArray
                 .filter { it is JsonObject }
                 .map { it as JsonObject }
-                .map {
-                    it.getJsonArray("headers").addAll(JsonArray(proxyHeaders.map { JsonObject(Json.encode(it)) }))
-                    it
-                }
+                .map { addClientRequestHeaders(it, proxyHeaders) }
                 .map { Json.decodeValue(it.encode(), KalforRequest::class.java) }
+        HttpMethod.GET -> routingContext.request().params().getAll("c")
+                .map { makeKalforRequest(it, proxyHeaders) }
+        else -> emptyList()
     }
+}
 
-    return emptyList()
+private fun filterHeaders(routingContext: RoutingContext): MultiMap {
+    val newHeaders = MultiMap.caseInsensitiveMultiMap()
+    val headers = routingContext.request().headers()
+    headers.names()
+            .filter { it.startsWith("x-", true) }
+            .forEach { newHeaders.add(it, headers.get(it)) }
+    return newHeaders
+}
+
+private fun makeKalforRequest(it: String?, proxyHeaders: List<KalforProxyHeader>): KalforRequest {
+    val url = URI(URLDecoder.decode(it, Charsets.UTF_8.name()))
+    return KalforRequest("${url.scheme}://${url.host}:${url.port}", proxyHeaders, listOf(KalforProxyRequest("unused", url.rawPath)), HttpMethod.GET)
+}
+
+private fun addClientRequestHeaders(it: JsonObject, proxyHeaders: List<KalforProxyHeader>): JsonObject {
+    it.getJsonArray("headers", JsonArray()).addAll(JsonArray(proxyHeaders.map { JsonObject(Json.encode(it)) }))
+    return it
 }
 
 private fun convertMultiMapToProxyHeaders(newHeaders: MultiMap) = newHeaders.names().map { KalforProxyHeader(it, newHeaders.get(it)) }
@@ -103,11 +119,11 @@ fun respondToClient(
     serverResponse.end(it)
 }
 
-fun makeHttpGetRequest(url: String, headers: List<KalforProxyHeader>, vertx: Vertx) : Observable<Buffer> {
+fun makeHttpGetRequest(url: String, headers: List<KalforProxyHeader>?, vertx: Vertx) : Observable<Buffer> {
     val httpClient = getHttpClient(vertx)
     val uri = URI(url)
     val port = if (uri.port == -1) 80 else uri.port
-    val multiMapHeaders = headers.fold(MultiMap.caseInsensitiveMultiMap(), { m, h ->
+    val multiMapHeaders = headers?.fold(MultiMap.caseInsensitiveMultiMap(), { m, h ->
         m.add(h.name, h.value)
     })
     return RxHelper.get(httpClient, port, uri.host, uri.path, multiMapHeaders)

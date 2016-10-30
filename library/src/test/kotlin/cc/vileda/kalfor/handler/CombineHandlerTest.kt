@@ -4,6 +4,7 @@ import com.jayway.restassured.RestAssured
 import com.jayway.restassured.RestAssured.get
 import com.jayway.restassured.RestAssured.given
 import com.jayway.restassured.response.Header
+import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.TestContext
@@ -97,6 +98,34 @@ class CombineHandlerTest {
                 .put("2secondKey", JsonObject().put("2foo", "2bar"))
                 .put("3thirdKey", JsonObject().put("1foo", "1bar"))
                 .put("4fourthKey", JsonObject().put("2foo", "2bar").put("a3foo", "a3bar"))
+                .encodePrettily()
+
+        RestAssured
+                .given()
+                .body(given)
+                .header(Header("Content-Type", "application/json"))
+                .`when`()
+                .post("http://localhost:$kalforPort/combine")
+                .then()
+                .body(Matchers.containsString(expected))
+    }
+
+    @Test
+    fun combineHandlerShouldCombineViaPostWOHeaders() {
+        val req1 = KalforRequest(
+                "http://localhost:$restApiMockPort",
+                emptyList(),
+                Arrays.asList(
+                        KalforProxyRequest("1firstKey", "/test"),
+                        KalforProxyRequest("2secondKey", "/test")))
+
+        val request = JsonObject(Json.encode(req1))
+        request.remove("headers")
+        val given = JsonArray(listOf(request)).encodePrettily()
+
+        val expected = JsonObject()
+                .put("1firstKey", JsonObject().put("1foo", "1bar"))
+                .put("2secondKey", JsonObject().put("1foo", "1bar"))
                 .encodePrettily()
 
         RestAssured

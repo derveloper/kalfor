@@ -16,7 +16,7 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
                 .onErrorReturn { throwable -> Observable.empty() }
                 .doOnError { it.printStackTrace() }
                 .flatMap { it }
-                .reduce("", aggregateResponse())
+                .reduce("", aggregateResponseStrategy())
                 .doOnError { it.printStackTrace() }
                 .onErrorReturn { "" }
                 .defaultIfEmpty("")
