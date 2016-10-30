@@ -2,6 +2,7 @@ package cc.vileda.kalfor.handler
 
 import com.jayway.restassured.RestAssured
 import com.jayway.restassured.RestAssured.get
+import com.jayway.restassured.RestAssured.given
 import com.jayway.restassured.response.Header
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
@@ -14,7 +15,6 @@ import org.apache.http.entity.ContentType
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.Matchers
 import org.junit.BeforeClass
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.net.ServerSocket
@@ -25,20 +25,29 @@ import java.util.*
 class CombineHandlerTest {
     @Test
     fun staticFileServerMockShouldRespond() {
-        get("http://localhost:$staticFileServerMockPort/test1.css")
-                .then()
-                .body(containsString("#test1 { margin: 0 auto; }"))
+        given()
+                .header("x-foo", "bar")
+        .`when`()
+            .get("http://localhost:$staticFileServerMockPort/test1.css")
+        .then()
+            .body(containsString("#test1 { margin: 0 auto; }"))
 
-        get("http://localhost:$staticFileServerMockPort/test2.css")
-                .then()
-                .body(containsString("#test2 { margin: 0 auto; }"))
+        given()
+            .header("x-foo", "bar")
+        .`when`()
+            .get("http://localhost:$staticFileServerMockPort/test2.css")
+        .then()
+            .body(containsString("#test2 { margin: 0 auto; }"))
     }
 
     @Test
     fun restApiMockShouldRespond() {
-        get("http://localhost:$restApiMockPort/test")
-                .then()
-                .body(containsString(JsonObject().put("1foo", "1bar").encodePrettily()))
+        given()
+            .header("x-foo", "bar")
+        .`when`()
+            .get("http://localhost:$restApiMockPort/test")
+         .then()
+            .body(containsString(JsonObject().put("1foo", "1bar").encodePrettily()))
     }
 
     @Test

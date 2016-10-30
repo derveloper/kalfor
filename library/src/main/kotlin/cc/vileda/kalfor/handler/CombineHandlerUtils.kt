@@ -3,8 +3,10 @@ package cc.vileda.kalfor.handler
 import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.json.Json
+import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.LoggerFactory
+import io.vertx.rxjava.core.MultiMap
 import io.vertx.rxjava.core.RxHelper
 import io.vertx.rxjava.core.Vertx
 import io.vertx.rxjava.core.buffer.Buffer
@@ -20,9 +22,11 @@ import java.util.*
 private val LOGGER = LoggerFactory.getLogger(CombineHandler::class.java)
 
 
-fun parseRequest(routingContext: RoutingContext, vertx: Vertx): List<ResponseContext> {
-    return parseRequestStrategy(routingContext)
-            .flatMap(executeRequest(vertx))
+fun parseRequest(routingContext: RoutingContext, vertx: Vertx): Observable<ResponseContext> {
+    return Observable.from(parseRequestStrategy(routingContext)
+            .flatMap(executeRequest(vertx)))
+            .doOnEach(::println)
+            .doOnError { it.printStackTrace() }
 }
 
 fun aggregateResponse() = { t1: String, t2: ResponseContext ->
@@ -53,23 +57,39 @@ fun convertResponseStrategy(resp: ResponseContext): Observable<ResponseContext>?
     }
 }
 
-fun parseRequestStrategy(routingContext: RoutingContext): List<KalforRequest> {
+private fun parseRequestStrategy(routingContext: RoutingContext): List<KalforRequest> {
+    val newHeaders = MultiMap.caseInsensitiveMultiMap()
+    val headers = routingContext.request().headers()
+    headers.names().forEach {
+        if (it.startsWith("x-", true)) {
+            newHeaders.add(it, headers.get(it))
+        }
+    }
+
+    val proxyHeaders = convertMultiMapToProxyHeaders(newHeaders)
+
     if (routingContext.request().method() == HttpMethod.GET) {
         return routingContext.request().params().getAll("c")
                 .map {
                     val url = URI(URLDecoder.decode(it, Charsets.UTF_8.name()))
-                    KalforRequest("${url.scheme}://${url.host}:${url.port}", emptyList(), listOf(KalforProxyRequest("unused", url.rawPath)), HttpMethod.GET)
+                    KalforRequest("${url.scheme}://${url.host}:${url.port}", proxyHeaders, listOf(KalforProxyRequest("unused", url.rawPath)), HttpMethod.GET)
                 }
     }
     else if (routingContext.request().method() == HttpMethod.POST) {
         return routingContext.bodyAsJsonArray
                 .filter { it is JsonObject }
                 .map { it as JsonObject }
+                .map {
+                    it.getJsonArray("headers").addAll(JsonArray(proxyHeaders.map { JsonObject(Json.encode(it)) }))
+                    it
+                }
                 .map { Json.decodeValue(it.encode(), KalforRequest::class.java) }
     }
 
     return emptyList()
 }
+
+private fun convertMultiMapToProxyHeaders(newHeaders: MultiMap) = newHeaders.names().map { KalforProxyHeader(it, newHeaders.get(it)) }
 
 fun respondToClient(
         serverRequest: HttpServerRequest,
@@ -83,10 +103,14 @@ fun respondToClient(
     serverResponse.end(it)
 }
 
-fun makeHttpGetRequest(url: String, vertx: Vertx) : Observable<Buffer> {
+fun makeHttpGetRequest(url: String, headers: List<KalforProxyHeader>, vertx: Vertx) : Observable<Buffer> {
     val httpClient = getHttpClient(vertx)
     val uri = URI(url)
-    return RxHelper.get(httpClient, if (uri.port == -1) 80 else uri.port, uri.host, uri.path)
+    val port = if (uri.port == -1) 80 else uri.port
+    val multiMapHeaders = headers.fold(MultiMap.caseInsensitiveMultiMap(), { m, h ->
+        m.add(h.name, h.value)
+    })
+    return RxHelper.get(httpClient, port, uri.host, uri.path, multiMapHeaders)
             .doOnError { it.printStackTrace() }
             .flatMap{ it.toObservable() }
 }
@@ -94,7 +118,8 @@ fun makeHttpGetRequest(url: String, vertx: Vertx) : Observable<Buffer> {
 private fun executeRequest(vertx: Vertx): (KalforRequest) -> List<ResponseContext> {
     return { request ->
         request.proxyRequests.map {
-            ResponseContext(request.type, it.key, makeHttpGetRequest("${request.proxyBaseUrl}${it.path}", vertx))
+            val bufferObservable = makeHttpGetRequest("${request.proxyBaseUrl}${it.path}", request.headers, vertx)
+            ResponseContext(request.type, it.key, bufferObservable)
         }
     }
 }

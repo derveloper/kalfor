@@ -11,9 +11,7 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
         val request = routingContext.request()
         val response = routingContext.response()
 
-        Observable.from(parseRequest(routingContext, vertx))
-                .doOnEach(::println)
-                .doOnError { it.printStackTrace() }
+        parseRequest(routingContext, vertx)
                 .map(::convertResponseStrategy)
                 .onErrorReturn { throwable -> Observable.empty() }
                 .doOnError { it.printStackTrace() }
