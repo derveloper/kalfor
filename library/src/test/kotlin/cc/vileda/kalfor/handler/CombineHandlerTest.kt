@@ -113,6 +113,7 @@ class CombineHandlerTest {
         RestAssured
                 .given()
                 .param("c", given)
+                .header("x-foo", "bar")
                 .header("content-type", ContentType.TEXT_PLAIN)
                 .`when`()
                 .get("http://localhost:$kalforPort/combine")

@@ -10,6 +10,14 @@ internal class StaticFileServerMock(private val port: Int) : AbstractVerticle() 
     override fun start() {
         val httpServer = vertx.createHttpServer()
         val router = Router.router(vertx)
+        router.route().handler { routingContext ->
+            if (routingContext.request().getHeader("x-foo") == null) {
+                routingContext.response().setStatusCode(500).end("missing header x-foo")
+            }
+            else {
+                routingContext.next()
+            }
+        }
         router.route("/test1.css").handler { routingContext ->
             val headers = routingContext.request().headers()
             LOGGER.info(Json.encodePrettily(headers.names()))
