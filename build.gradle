@@ -39,6 +39,7 @@ subprojects {
     apply plugin: 'kotlin'
     apply plugin: 'maven'
     apply plugin: 'signing'
+    apply plugin: 'jacoco'
 
     compileJava {
         sourceCompatibility = "1.8"
@@ -51,6 +52,8 @@ subprojects {
         testCompile "junit:junit:${junitVersion}"
         testCompile "org.jetbrains.kotlin:kotlin-test:${kotlinVersion}"
     }
+
+    test.useTestNG()
 
     if (pomOnlyProject) {
         artifacts {}
@@ -153,6 +156,25 @@ subprojects {
     } else {
         uploadArchives { repositories { mavenDeployer {} } }
     }
+}
+
+task codeCoverageReport(type: JacocoReport) {
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+
+    subprojects.each {
+        sourceSets it.sourceSets.main
+    }
+
+    reports {
+        xml.enabled true
+        xml.destination "${buildDir}/reports/jacoco/report.xml"
+        html.enabled false
+        csv.enabled false
+    }
+}
+
+codeCoverageReport.dependsOn {
+    subprojects*.test
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
