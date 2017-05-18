@@ -1,9 +1,8 @@
 package cc.vileda.kalfor.handler
 
-import com.jayway.restassured.RestAssured
-import com.jayway.restassured.RestAssured.get
-import com.jayway.restassured.RestAssured.given
-import com.jayway.restassured.response.Header
+import io.restassured.RestAssured
+import io.restassured.RestAssured.given
+import io.restassured.http.Header
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
@@ -58,11 +57,14 @@ class CombineHandlerTest {
                 listOf(KalforProxyHeader("x-foo", "bar")),
                 Arrays.asList(
                         KalforProxyRequest("1firstKey", "/test"),
-                        KalforProxyRequest("2secondKey", "/test2"))))).encodePrettily()
+                        KalforProxyRequest("2secondKey", "/test2"),
+                        KalforProxyRequest("3thirdKey", "/test")))))
+                .encodePrettily()
 
         val expected = JsonObject()
                 .put("1firstKey", JsonObject().put("1foo", "1bar"))
                 .put("2secondKey", JsonObject().put("2foo", "2bar"))
+                .put("3thirdKey", JsonObject().put("1foo", "1bar"))
                 .encodePrettily()
 
         RestAssured
@@ -205,7 +207,7 @@ class CombineHandlerTest {
             val restApi2MockVerticle = RxHelper.deployVerticle(vertx, RestApi2Mock(restApi2MockPort))
             val staticFileServerMockVerticle = RxHelper.deployVerticle(vertx, StaticFileServerMock(staticFileServerMockPort))
             val kalforVerticle = RxHelper.deployVerticle(vertx, KalforTestVerticle(kalforPort))
-    
+
             restApiMockVerticle
                     .mergeWith(restApi2MockVerticle)
                     .mergeWith(staticFileServerMockVerticle)

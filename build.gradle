@@ -2,7 +2,7 @@ group 'cc.vileda.kalfor'
 version '3.1.1'
 
 buildscript {
-    ext.kotlinVersion = '1.0.4'
+    ext.kotlinVersion = '1.1.2-2'
     ext.extraConfVersion = '2.2.+'
 
     repositories {
@@ -41,8 +41,8 @@ subprojects {
     apply plugin: 'signing'
 
     compileJava {
-        sourceCompatibility = "1.6"
-        targetCompatibility = "1.6"
+        sourceCompatibility = "1.8"
+        targetCompatibility = "1.8"
     }
 
     dependencies {

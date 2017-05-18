@@ -12,11 +12,11 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
         val response = routingContext.response()
 
         parseRequest(routingContext, vertx)
-                .map(::convertResponseStrategy)
-                .onErrorReturn { throwable -> Observable.empty() }
+                .map(::convertResponse)
+                .onErrorReturn { _ -> Observable.empty() }
                 .doOnError { it.printStackTrace() }
                 .flatMap { it }
-                .reduce("", aggregateResponseStrategy())
+                .reduce("", aggregateResponse())
                 .doOnError { it.printStackTrace() }
                 .onErrorReturn { "" }
                 .defaultIfEmpty("")

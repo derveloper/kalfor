@@ -29,7 +29,7 @@ fun parseRequest(routingContext: RoutingContext, vertx: Vertx): Observable<Respo
             .doOnError { it.printStackTrace() }
 }
 
-fun aggregateResponseStrategy() = { last: String, ctx: ResponseContext ->
+fun aggregateResponse() = { last: String, ctx: ResponseContext ->
     when (ctx.method) {
         HttpMethod.POST -> aggregateJsonResponse(last, ctx)
         else -> aggregatePlainTextResponse(last, ctx)
@@ -45,7 +45,7 @@ private fun aggregateJsonResponse(last: String, ctx: ResponseContext): String {
     return JsonObject(TreeMap(jsonObject.put(key, body.getJsonObject(key)).map)).encodePrettily()
 }
 
-fun convertResponseStrategy(resp: ResponseContext): Observable<ResponseContext>? {
+fun convertResponse(resp: ResponseContext): Observable<ResponseContext>? {
     return when (resp.method) {
         HttpMethod.POST -> convertResponseToJson(resp)
         else -> convertResponseToPlainText(resp)
