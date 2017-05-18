@@ -15,6 +15,12 @@ buildscript {
 }
 
 allprojects {
+    apply plugin: 'jacoco'
+
+    repositories {
+        mavenCentral()
+    }
+
     ext {
         appVersion = '3.1.1'
         appGroup = 'cc.vileda.kalfor'
@@ -28,10 +34,6 @@ subprojects {
     group 'cc.vileda.kalfor'
     version '3.1.1'
 
-    repositories {
-        mavenCentral()
-    }
-
     def pomOnlyProject = project.name == "kalfor"
 
     apply plugin: 'optional-base'
@@ -39,7 +41,6 @@ subprojects {
     apply plugin: 'kotlin'
     apply plugin: 'maven'
     apply plugin: 'signing'
-    apply plugin: 'jacoco'
 
     compileJava {
         sourceCompatibility = "1.8"
