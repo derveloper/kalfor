@@ -5,6 +5,7 @@ import io.vertx.core.http.HttpMethod
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
+import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.rxjava.core.MultiMap
 import io.vertx.rxjava.core.RxHelper
@@ -19,14 +20,14 @@ import java.net.URI
 import java.net.URLDecoder
 import java.util.*
 
-private val LOGGER = LoggerFactory.getLogger(CombineHandler::class.java)
+val LOGGER: Logger = LoggerFactory.getLogger(CombineHandler::class.java)
 
 
 fun parseRequest(routingContext: RoutingContext, vertx: Vertx): Observable<ResponseContext> {
     return Observable.from(parseRequestStrategy(routingContext)
             .flatMap(executeRequest(vertx)))
-            .doOnEach(::println)
-            .doOnError { it.printStackTrace() }
+            .doOnEach(LOGGER::debug)
+            .doOnError { LOGGER.error(it.message, it) }
 }
 
 fun aggregateResponse() = { last: String, ctx: ResponseContext ->
@@ -127,7 +128,7 @@ fun makeHttpGetRequest(url: String, headers: List<KalforProxyHeader>?, vertx: Ve
         m.add(h.name, h.value)
     })
     return RxHelper.get(httpClient, port, uri.host, uri.path, multiMapHeaders)
-            .doOnError { it.printStackTrace() }
+            .doOnError { LOGGER.error(it.message, it) }
             .flatMap{ it.toObservable() }
 }
 

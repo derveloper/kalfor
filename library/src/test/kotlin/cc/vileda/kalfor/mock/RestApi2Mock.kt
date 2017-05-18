@@ -31,6 +31,6 @@ internal class RestApi2Mock(private val port: Int) : io.vertx.rxjava.core.Abstra
     }
 
     companion object {
-        private val LOGGER = io.vertx.core.logging.LoggerFactory.getLogger(cc.vileda.kalfor.handler.RestApiMock::class.java)
+        private val LOGGER = io.vertx.core.logging.LoggerFactory.getLogger(RestApiMock::class.java)
     }
 }

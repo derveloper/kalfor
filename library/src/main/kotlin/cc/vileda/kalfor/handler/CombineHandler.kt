@@ -14,10 +14,10 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
         parseRequest(routingContext, vertx)
                 .map(::convertResponse)
                 .onErrorReturn { _ -> Observable.empty() }
-                .doOnError { it.printStackTrace() }
+                .doOnError { LOGGER.error(it.message, it) }
                 .flatMap { it }
                 .reduce("", aggregateResponse())
-                .doOnError { it.printStackTrace() }
+                .doOnError { LOGGER.error(it.message, it) }
                 .onErrorReturn { "" }
                 .defaultIfEmpty("")
                 .subscribe(respondToClient(request, response))
