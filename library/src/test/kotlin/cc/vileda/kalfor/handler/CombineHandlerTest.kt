@@ -1,5 +1,9 @@
 package cc.vileda.kalfor.handler
 
+import cc.vileda.kalfor.mock.KalforTestVerticle
+import cc.vileda.kalfor.mock.RestApi2Mock
+import cc.vileda.kalfor.mock.RestApiMock
+import cc.vileda.kalfor.mock.StaticFileServerMock
 import io.restassured.RestAssured
 import io.restassured.RestAssured.given
 import io.restassured.http.Header

@@ -1,4 +1,4 @@
-package cc.vileda.kalfor.handler
+package cc.vileda.kalfor.mock
 
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject

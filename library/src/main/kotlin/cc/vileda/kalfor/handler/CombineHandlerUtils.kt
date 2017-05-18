@@ -56,7 +56,7 @@ private fun convertResponseToJson(resp: ResponseContext): Observable<ResponseCon
     return resp.bufferObservable.map {
         val jsonObject = JsonObject(it.toString(Charsets.UTF_8.name()))
         resp.body = JsonObject().put(resp.key, jsonObject).encodePrettily()
-        println("converted json ${resp.body}")
+        LOGGER.debug("converted json ${resp.body}")
         resp
     }
 }
@@ -64,7 +64,7 @@ private fun convertResponseToJson(resp: ResponseContext): Observable<ResponseCon
 private fun convertResponseToPlainText(resp: ResponseContext): Observable<ResponseContext>? {
     return resp.bufferObservable.map {
         resp.body = it.toString(Charsets.UTF_8.name())
-        println("converted text ${resp.body}")
+        LOGGER.debug("converted text ${resp.body}")
         resp
     }
 }
@@ -111,7 +111,7 @@ fun respondToClient(
         serverRequest: HttpServerRequest,
         serverResponse: HttpServerResponse
 ): (String?) -> Unit = {
-    LOGGER.info("------- Swriting response: $it")
+    LOGGER.info("------- writing response: $it")
     if (serverRequest.getHeader("content-type") != null) {
         serverResponse.putHeader("content-type", serverRequest.getHeader("content-type"))
     }
@@ -132,10 +132,10 @@ fun makeHttpGetRequest(url: String, headers: List<KalforProxyHeader>?, vertx: Ve
 }
 
 private fun executeRequest(vertx: Vertx): (KalforRequest) -> List<ResponseContext> {
-    return { request ->
-        request.proxyRequests.map {
-            val bufferObservable = makeHttpGetRequest("${request.proxyBaseUrl}${it.path}", request.headers, vertx)
-            ResponseContext(request.type, it.key, bufferObservable)
+    return { (proxyBaseUrl, headers, proxyRequests, type) ->
+        proxyRequests.map {
+            val bufferObservable = makeHttpGetRequest("$proxyBaseUrl${it.path}", headers, vertx)
+            ResponseContext(type, it.key, bufferObservable)
         }
     }
 }
