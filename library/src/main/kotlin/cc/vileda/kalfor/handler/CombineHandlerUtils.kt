@@ -1,6 +1,7 @@
 package cc.vileda.kalfor.handler
 
 import io.vertx.core.http.HttpClientOptions
+import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
@@ -113,12 +114,19 @@ fun respondToClient(
         serverResponse: HttpServerResponse
 ): (String?) -> Unit = {
     LOGGER.info("------- writing response: $it")
-    if (serverRequest.getHeader("content-type") != null) {
-        serverResponse.putHeader("content-type", serverRequest.getHeader("content-type"))
+    serverRequest.getHeader(HttpHeaders.CONTENT_TYPE).let {
+        serverResponse.putHeader(HttpHeaders.CONTENT_TYPE, it)
     }
 
     serverResponse.end(it)
 }
+
+private fun HttpServerResponse.putHeader(header: CharSequence, value: String?) {
+    putHeader(header.toString(), value)
+}
+
+private fun HttpServerRequest.getHeader(header: CharSequence): String? =
+        getHeader(header.toString())
 
 fun makeHttpGetRequest(url: String, headers: List<KalforProxyHeader>?, vertx: Vertx) : Observable<Buffer> {
     val httpClient = getHttpClient(vertx)
