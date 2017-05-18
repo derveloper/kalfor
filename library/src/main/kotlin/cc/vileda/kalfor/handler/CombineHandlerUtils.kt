@@ -128,7 +128,7 @@ private fun HttpServerResponse.putHeader(header: CharSequence, value: String?) {
 private fun HttpServerRequest.getHeader(header: CharSequence): String? =
         getHeader(header.toString())
 
-fun makeHttpGetRequest(url: String, headers: List<KalforProxyHeader>?, vertx: Vertx) : Observable<Buffer> {
+fun makeHttpGetRequest(url: String, headers: List<KalforProxyHeader>?, vertx: Vertx): Observable<Buffer> {
     val httpClient = getHttpClient(vertx)
     val uri = URI(url)
     val port = if (uri.port == -1) 80 else uri.port
@@ -137,7 +137,7 @@ fun makeHttpGetRequest(url: String, headers: List<KalforProxyHeader>?, vertx: Ve
                     { m, h -> m.add(h.name, h.value) })
     return RxHelper.get(httpClient, port, uri.host, uri.path, multiMapHeaders)
             .doOnError { LOGGER.error(it.message, it) }
-            .flatMap{ it.toObservable() }
+            .flatMap { it.toObservable() }
 }
 
 private fun executeRequest(vertx: Vertx): (KalforRequest) -> List<ResponseContext> {
