@@ -113,7 +113,7 @@ fun respondToClient(
         serverRequest: HttpServerRequest,
         serverResponse: HttpServerResponse
 ): (String?) -> Unit = {
-    LOGGER.info("------- writing response: $it")
+    LOGGER.debug("------- writing response: $it")
     serverRequest.getHeader(HttpHeaders.CONTENT_TYPE).let {
         serverResponse.putHeader(HttpHeaders.CONTENT_TYPE, it)
     }
@@ -132,9 +132,9 @@ fun makeHttpGetRequest(url: String, headers: List<KalforProxyHeader>?, vertx: Ve
     val httpClient = getHttpClient(vertx)
     val uri = URI(url)
     val port = if (uri.port == -1) 80 else uri.port
-    val multiMapHeaders = headers?.fold(MultiMap.caseInsensitiveMultiMap(), { m, h ->
-        m.add(h.name, h.value)
-    })
+    val multiMapHeaders = headers
+            ?.fold(MultiMap.caseInsensitiveMultiMap(),
+                    { m, h -> m.add(h.name, h.value) })
     return RxHelper.get(httpClient, port, uri.host, uri.path, multiMapHeaders)
             .doOnError { LOGGER.error(it.message, it) }
             .flatMap{ it.toObservable() }
