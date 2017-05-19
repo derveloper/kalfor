@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/derveloper/kalfor.svg?branch=master)](https://travis-ci.org/derveloper/kalfor)
 [![codecov](https://codecov.io/gh/derveloper/kalfor/branch/master/graph/badge.svg)](https://codecov.io/gh/derveloper/kalfor)
 [![Dependency Status](https://www.versioneye.com/user/projects/591f41b98dcc41003af21ec7/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/591f41b98dcc41003af21ec7)
+[![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/vert-x3/vertx-awesome#microservices)
 
 kalfor is a HTTP multiplexer microservice
 
