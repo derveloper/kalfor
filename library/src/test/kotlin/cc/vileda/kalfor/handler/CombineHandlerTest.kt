@@ -216,6 +216,7 @@ class CombineHandlerTest {
                     .mergeWith(restApi2MockVerticle)
                     .mergeWith(staticFileServerMockVerticle)
                     .mergeWith(kalforVerticle)
+                    .reduce("") { a, b -> "$a, $b" }
                     .subscribe {
                         LOGGER.info("deployed Kalfor " + it)
                         async.complete()
