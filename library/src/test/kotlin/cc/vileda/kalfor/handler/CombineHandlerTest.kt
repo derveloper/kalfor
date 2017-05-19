@@ -207,18 +207,13 @@ class CombineHandlerTest {
         fun setUp(context: TestContext) {
             val vertx = Vertx.vertx()
             val async = context.async()
-            val restApiMockVerticle = RxHelper.deployVerticle(vertx, RestApiMock(restApiMockPort))
-            val restApi2MockVerticle = RxHelper.deployVerticle(vertx, RestApi2Mock(restApi2MockPort))
-            val staticFileServerMockVerticle = RxHelper.deployVerticle(vertx, StaticFileServerMock(staticFileServerMockPort))
-            val kalforVerticle = RxHelper.deployVerticle(vertx, KalforTestVerticle(kalforPort))
-
-            restApiMockVerticle
-                    .mergeWith(restApi2MockVerticle)
-                    .mergeWith(staticFileServerMockVerticle)
-                    .mergeWith(kalforVerticle)
+            RxHelper.deployVerticle(vertx, RestApiMock(restApiMockPort))
+                    .mergeWith(RxHelper.deployVerticle(vertx, RestApi2Mock(restApi2MockPort)))
+                    .mergeWith(RxHelper.deployVerticle(vertx, StaticFileServerMock(staticFileServerMockPort)))
+                    .mergeWith(RxHelper.deployVerticle(vertx, KalforTestVerticle(kalforPort)))
                     .reduce("") { a, b -> "$a, $b" }
                     .subscribe {
-                        LOGGER.info("deployed Kalfor " + it)
+                        LOGGER.info("deployed Kalfor" + it)
                         async.complete()
                     }
         }
