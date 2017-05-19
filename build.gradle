@@ -41,6 +41,9 @@ subprojects {
     apply plugin: 'kotlin'
     apply plugin: 'maven'
     apply plugin: 'signing'
+    apply plugin: 'jacoco'
+
+    test.useJUnit()
 
     compileJava {
         sourceCompatibility = "1.8"
@@ -53,8 +56,6 @@ subprojects {
         testCompile "junit:junit:${junitVersion}"
         testCompile "org.jetbrains.kotlin:kotlin-test:${kotlinVersion}"
     }
-
-    test.useTestNG()
 
     if (pomOnlyProject) {
         artifacts {}
