@@ -89,12 +89,12 @@ private fun parseRequestStrategy(routingContext: RoutingContext): List<KalforReq
 }
 
 private fun filterHeaders(routingContext: RoutingContext): MultiMap {
-    val newHeaders = MultiMap.caseInsensitiveMultiMap()
     val headers = routingContext.request().headers()
-    headers.names()
+    return routingContext.request().headers().names()
             .filter { it.startsWith("x-", true) }
-            .forEach { newHeaders.add(it, headers.get(it)) }
-    return newHeaders
+            .fold(MultiMap.caseInsensitiveMultiMap()) { map, header ->
+                map.add(header, headers.get(header))
+            }
 }
 
 private fun makeKalforRequest(it: String?, proxyHeaders: List<KalforProxyHeader>): KalforRequest {
