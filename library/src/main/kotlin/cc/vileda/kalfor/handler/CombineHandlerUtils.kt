@@ -151,7 +151,7 @@ fun makeHttpGetRequest(url: String, headers: List<KalforProxyHeader>?, vertx: Ve
         val req = httpClient.get(port, uri.host, uri.path)
         req.headers()
                 .addAll(multiMapHeaders)
-                .add("User-Agent", "kalfor-3.1.2")
+                .add("User-Agent", "kalfor-3.2.0")
         val resp = req
                 .setFollowRedirects(true)
                 .toObservable()
