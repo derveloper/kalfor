@@ -82,6 +82,34 @@ class CombineHandlerTest {
     }
 
     @Test
+    fun combineHandlerShouldCombineRedirectedViaPost() {
+        val given = JsonArray(listOf(KalforRequest(
+                "http://localhost:$restApiMockPort",
+                listOf(KalforProxyHeader("x-foo", "bar")),
+                Arrays.asList(
+                        KalforProxyRequest("1firstKey", "/test"),
+                        KalforProxyRequest("2secondKey", "/test2"),
+                        KalforProxyRequest("3thirdKey", "/testrdr")))))
+                .encodePrettily()
+
+        val expected = JsonObject()
+                .put("1firstKey", JsonObject().put("1foo", "1bar"))
+                .put("2secondKey", JsonObject().put("2foo", "2bar"))
+                .put("3thirdKey", JsonObject().put("1foo", "1bar"))
+                .encodePrettily()
+
+        RestAssured
+                .given()
+                .body(given)
+                .header(Header("Content-Type", "application/json"))
+                .`when`()
+                .post("http://localhost:$kalforPort/combine")
+                .then()
+                .body(Matchers.containsString(expected))
+    }
+
+
+    @Test
     fun combineHandlerShouldCombineMultipleViaPost() {
         val req1 = KalforRequest(
                 "http://localhost:$restApiMockPort",
@@ -103,7 +131,8 @@ class CombineHandlerTest {
                 .put("1firstKey", JsonObject().put("1foo", "1bar"))
                 .put("2secondKey", JsonObject().put("2foo", "2bar"))
                 .put("3thirdKey", JsonObject().put("1foo", "1bar"))
-                .put("4fourthKey", JsonObject().put("2foo", "2bar").put("a3foo", "a3bar"))
+                .put("4fourthKey", JsonObject().put("2foo", "2bar")
+                        .put("a3foo", "a3bar"))
                 .encodePrettily()
 
         RestAssured

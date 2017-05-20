@@ -1,11 +1,11 @@
 project.description = "library"
 
 dependencies {
-    compile "org.apache.httpcomponents:httpclient:4.5.3"
     compile "io.vertx:vertx-core:3.4.1"
     compile "io.vertx:vertx-web:3.4.1"
     compile "io.vertx:vertx-rx-java:3.4.1"
     compile "com.github.fge:json-schema-validator:2.2.6"
+    compile "org.funktionale:funktionale-all:1.0.1"
     testCompile "io.vertx:vertx-unit:3.4.1"
     testCompile "io.rest-assured:rest-assured:3.0.3"
 }

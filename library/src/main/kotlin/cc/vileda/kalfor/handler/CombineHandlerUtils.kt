@@ -13,10 +13,13 @@ import io.vertx.rxjava.core.RxHelper
 import io.vertx.rxjava.core.Vertx
 import io.vertx.rxjava.core.buffer.Buffer
 import io.vertx.rxjava.core.http.HttpClient
+import io.vertx.rxjava.core.http.HttpClientResponse
 import io.vertx.rxjava.core.http.HttpServerRequest
 import io.vertx.rxjava.core.http.HttpServerResponse
 import io.vertx.rxjava.ext.web.RoutingContext
+import org.funktionale.memoization.memoize
 import rx.Observable
+import rx.observables.AsyncOnSubscribe
 import java.net.URI
 import java.net.URLDecoder
 import java.util.*
@@ -48,15 +51,19 @@ private fun aggregateJsonResponse(last: String, ctx: ResponseContext): String {
 }
 
 fun convertResponse(resp: ResponseContext): Observable<ResponseContext>? {
-    return when (resp.method) {
-        HttpMethod.POST -> convertResponseToJson(resp)
-        else -> convertResponseToPlainText(resp)
+    return try {
+        when (resp.method) {
+            HttpMethod.POST -> convertResponseToJson(resp)
+            else -> convertResponseToPlainText(resp)
+        }
+    } catch (e: Exception) {
+        convertResponseToPlainText(resp)
     }
 }
 
 private fun convertResponseToJson(resp: ResponseContext): Observable<ResponseContext>? {
     return resp.bufferObservable.map {
-        val jsonObject = JsonObject(it.toString(Charsets.UTF_8.name()))
+        val jsonObject = it.toJsonObject()
         resp.body = JsonObject().put(resp.key, jsonObject).encodePrettily()
         LOGGER.debug("converted json ${resp.body}")
         resp
@@ -99,15 +106,23 @@ private fun filterHeaders(routingContext: RoutingContext): MultiMap {
 
 private fun makeKalforRequest(it: String?, proxyHeaders: List<KalforProxyHeader>): KalforRequest {
     val url = URI(URLDecoder.decode(it, Charsets.UTF_8.name()))
-    return KalforRequest("${url.scheme}://${url.host}:${url.port}", proxyHeaders, listOf(KalforProxyRequest("unused", url.rawPath)), HttpMethod.GET)
+    return KalforRequest(
+            "${url.scheme}://${url.host}:${url.port}",
+            proxyHeaders,
+            listOf(KalforProxyRequest("unused", url.rawPath)),
+            HttpMethod.GET)
 }
 
 private fun addClientRequestHeaders(it: JsonObject, proxyHeaders: List<KalforProxyHeader>): JsonObject {
-    it.getJsonArray("headers", JsonArray()).addAll(JsonArray(proxyHeaders.map { JsonObject(Json.encode(it)) }))
+    it.getJsonArray("headers", JsonArray())
+            .addAll(JsonArray(proxyHeaders.map {
+                JsonObject(Json.encode(it))
+            }))
     return it
 }
 
-private fun convertMultiMapToProxyHeaders(newHeaders: MultiMap) = newHeaders.names().map { KalforProxyHeader(it, newHeaders.get(it)) }
+private fun convertMultiMapToProxyHeaders(newHeaders: MultiMap) =
+        newHeaders.names().map { KalforProxyHeader(it, newHeaders.get(it)) }
 
 fun respondToClient(
         serverRequest: HttpServerRequest,
@@ -128,31 +143,47 @@ private fun HttpServerResponse.putHeader(header: CharSequence, value: String?) {
 private fun HttpServerRequest.getHeader(header: CharSequence): String? =
         getHeader(header.toString())
 
-fun makeHttpGetRequest(url: String, headers: List<KalforProxyHeader>?, vertx: Vertx): Observable<Buffer> {
+fun makeHttpGetRequest(url: String, headers: List<KalforProxyHeader>?, vertx: Vertx): Observable<HttpClientResponse> {
     val httpClient = getHttpClient(vertx)
     val uri = URI(url)
     val port = if (uri.port == -1) 80 else uri.port
     val multiMapHeaders = headers
             ?.fold(MultiMap.caseInsensitiveMultiMap(),
                     { m, h -> m.add(h.name, h.value) })
-    return RxHelper.get(httpClient, port, uri.host, uri.path, multiMapHeaders)
-            .doOnError { LOGGER.error(it.message, it) }
-            .flatMap { it.toObservable() }
+    return Observable.unsafeCreate<HttpClientResponse> { subscriber ->
+        val req = httpClient.get(port, uri.host, uri.path)
+        req.headers()
+                .addAll(multiMapHeaders)
+                .add("User-Agent", "kalfor-3.1.2")
+        val resp = req
+                .setFollowRedirects(true)
+                .toObservable()
+        resp.subscribe(subscriber)
+        req.end()
+    }.doOnError { LOGGER.error(it.message, it) }
 }
 
 private fun executeRequest(vertx: Vertx): (KalforRequest) -> List<ResponseContext> {
     return { (proxyBaseUrl, headers, proxyRequests, type) ->
         proxyRequests.map {
-            val bufferObservable = makeHttpGetRequest("$proxyBaseUrl${it.path}", headers, vertx)
-            ResponseContext(type, it.key, bufferObservable)
+            val response = makeHttpGetRequest("$proxyBaseUrl${it.path}", headers, vertx)
+            ResponseContext(
+                    type,
+                    it.key,
+                    response.map { it.headers().get(HttpHeaders.CONTENT_TYPE.toString()) },
+                    response.flatMap { it.toObservable() }
+            )
         }
     }
 }
 
-private fun getHttpClient(vertx: Vertx): HttpClient {
+private val getHttpClient: (Vertx) -> HttpClient = { v: Vertx ->
     val httpClientOptions = HttpClientOptions()
             .setTrustAll(true)
             .setVerifyHost(false)
-    return vertx.createHttpClient(httpClientOptions)
-}
+            .setMaxRedirects(10)
+            .setMaxChunkSize(10240)
+    LOGGER.info("created HttpClient")
+    v.createHttpClient(httpClientOptions)
+}.memoize()
 
