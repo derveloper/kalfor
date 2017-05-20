@@ -15,7 +15,6 @@ import io.vertx.rxjava.core.http.HttpClientResponse
 import io.vertx.rxjava.core.http.HttpServerRequest
 import io.vertx.rxjava.core.http.HttpServerResponse
 import io.vertx.rxjava.ext.web.RoutingContext
-import org.funktionale.memoization.memoize
 import rx.Observable
 import java.net.URI
 import java.net.URLDecoder
@@ -148,7 +147,9 @@ private fun HttpServerRequest.getHeader(header: CharSequence): String? =
 fun makeHttpGetRequest(url: String, headers: List<KalforProxyHeader>?, vertx: Vertx): Observable<HttpClientResponse> {
     val httpClient = getHttpClient(vertx)
     val uri = URI(url)
-    val port = if (uri.port == -1) 80 else uri.port
+    val port = if (uri.port == -1 && uri.scheme == "https") 443
+    else if (uri.port == -1 && uri.scheme == "http") 80
+    else uri.port
     val multiMapHeaders = headers
             ?.fold(MultiMap.caseInsensitiveMultiMap(),
                     { m, h -> m.add(h.name, h.value) })
@@ -186,5 +187,5 @@ private val getHttpClient: (Vertx) -> HttpClient = { v: Vertx ->
             .setMaxChunkSize(10240)
     LOGGER.info("created HttpClient")
     v.createHttpClient(httpClientOptions)
-}.memoize()
+}
 
