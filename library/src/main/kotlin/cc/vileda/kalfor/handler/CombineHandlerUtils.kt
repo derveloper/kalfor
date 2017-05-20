@@ -9,9 +9,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.rxjava.core.MultiMap
-import io.vertx.rxjava.core.RxHelper
 import io.vertx.rxjava.core.Vertx
-import io.vertx.rxjava.core.buffer.Buffer
 import io.vertx.rxjava.core.http.HttpClient
 import io.vertx.rxjava.core.http.HttpClientResponse
 import io.vertx.rxjava.core.http.HttpServerRequest
@@ -19,7 +17,6 @@ import io.vertx.rxjava.core.http.HttpServerResponse
 import io.vertx.rxjava.ext.web.RoutingContext
 import org.funktionale.memoization.memoize
 import rx.Observable
-import rx.observables.AsyncOnSubscribe
 import java.net.URI
 import java.net.URLDecoder
 import java.util.*
@@ -170,7 +167,6 @@ private fun executeRequest(vertx: Vertx): (KalforRequest) -> List<ResponseContex
             ResponseContext(
                     type,
                     it.key,
-                    response.map { it.headers().get(HttpHeaders.CONTENT_TYPE.toString()) },
                     response.flatMap { it.toObservable() }
             )
         }

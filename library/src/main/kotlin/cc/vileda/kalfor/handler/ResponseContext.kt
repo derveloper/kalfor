@@ -7,6 +7,5 @@ import rx.Observable
 data class ResponseContext(
         val method: HttpMethod,
         val key: String,
-        val contentType: Observable<String>,
         val bufferObservable: Observable<Buffer>,
         var body: String = "")
