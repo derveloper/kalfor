@@ -31,18 +31,14 @@ class SchemaValidationHandler : Handler<RoutingContext> {
             val validate = schema.validate(JsonLoader.fromString(routingContext.bodyAsString))
             if (validate.isSuccess) {
                 routingContext.next()
-                return
+            } else {
+                val messages = validate.fold(JsonArray()) {
+                    jsonArray, processingMessage ->
+                    jsonArray.add(processingMessage.message)
+                }
+                endWithBadRequest(JsonObject().put("error", messages), routingContext)
             }
-
-            val messages = validate.fold(JsonArray()) {
-                jsonArray, processingMessage ->
-                jsonArray.add(processingMessage.message)
-            }
-            endWithBadRequest(JsonObject().put("error", messages), routingContext)
-        } catch (e: ProcessingException) {
-            LOGGER.error(e)
-            endWithBadRequest(JsonObject().put("error", e.message), routingContext)
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             LOGGER.error(e)
             endWithBadRequest(JsonObject().put("error", e.message), routingContext)
         }
