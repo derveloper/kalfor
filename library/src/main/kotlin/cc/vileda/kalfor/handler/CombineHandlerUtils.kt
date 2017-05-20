@@ -41,30 +41,35 @@ fun aggregateResponse() = { last: String, ctx: ResponseContext ->
 private fun aggregatePlainTextResponse(last: String, ctx: ResponseContext) = last.plus("\n${ctx.body}")
 
 private fun aggregateJsonResponse(last: String, ctx: ResponseContext): String {
-    val body = JsonObject(ctx.body)
     val jsonObject = if (last == "") JsonObject() else JsonObject(last)
-    val key = body.fieldNames().first()
-    return JsonObject(TreeMap(jsonObject.put(key, body.getJsonObject(key)).map)).encodePrettily()
+
+    return try {
+        val body = JsonObject(ctx.body)
+        val key = body.fieldNames().first()
+        JsonObject(TreeMap(jsonObject.put(key, body.getJsonObject(key)).map)).encodePrettily()
+    } catch (e: Exception) {
+        JsonObject(TreeMap(jsonObject.put(ctx.key, ctx.body).map)).encodePrettily()
+    }
 }
 
 fun convertResponse(resp: ResponseContext): Observable<ResponseContext>? {
-    return try {
-        when (resp.method) {
-            HttpMethod.POST -> convertResponseToJson(resp)
-            else -> convertResponseToPlainText(resp)
-        }
-    } catch (e: Exception) {
-        convertResponseToPlainText(resp)
+    return when (resp.method) {
+        HttpMethod.POST -> convertResponseToJson(resp)
+        else -> convertResponseToPlainText(resp)
     }
 }
 
 private fun convertResponseToJson(resp: ResponseContext): Observable<ResponseContext>? {
-    return resp.bufferObservable.map {
-        val jsonObject = it.toJsonObject()
-        resp.body = JsonObject().put(resp.key, jsonObject).encodePrettily()
-        LOGGER.debug("converted json ${resp.body}")
+    return resp.bufferObservable.map<ResponseContext> {
+        try {
+            val jsonObject = it.toJsonObject()
+            resp.body = JsonObject().put(resp.key, jsonObject).encodePrettily()
+            LOGGER.debug("converted json ${resp.body}")
+        } catch (e: Exception) {
+            resp.body = it.toString(Charsets.UTF_8.name())
+        }
         resp
-    }
+    }.doOnError { convertResponseToPlainText(resp) }
 }
 
 private fun convertResponseToPlainText(resp: ResponseContext): Observable<ResponseContext>? {

@@ -37,6 +37,11 @@ internal class RestApiMock(private val port: Int) : AbstractVerticle() {
                     .end("Redirect!")
         }
 
+        router.route("/testbroken").handler { routingContext ->
+            routingContext.response()
+                    .end("{Broken!")
+        }
+
         httpServer.requestHandler({ router.accept(it) }).listen(port)
     }
 

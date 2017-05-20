@@ -108,6 +108,32 @@ class CombineHandlerTest {
                 .body(Matchers.containsString(expected))
     }
 
+    @Test
+    fun combineHandlerShouldCombineInvalidJsonViaPost() {
+        val given = JsonArray(listOf(KalforRequest(
+                "http://localhost:$restApiMockPort",
+                listOf(KalforProxyHeader("x-foo", "bar")),
+                Arrays.asList(
+                        KalforProxyRequest("1firstKey", "/test"),
+                        KalforProxyRequest("2secondKey", "/test2"),
+                        KalforProxyRequest("3thirdKey", "/testbroken")))))
+                .encodePrettily()
+
+        val expected = JsonObject()
+                .put("1firstKey", JsonObject().put("1foo", "1bar"))
+                .put("2secondKey", JsonObject().put("2foo", "2bar"))
+                .put("3thirdKey", "{Broken!")
+                .encodePrettily()
+
+        RestAssured
+                .given()
+                .body(given)
+                .header(Header("Content-Type", "application/json"))
+                .`when`()
+                .post("http://localhost:$kalforPort/combine")
+                .then()
+                .body(Matchers.containsString(expected))
+    }
 
     @Test
     fun combineHandlerShouldCombineMultipleViaPost() {
