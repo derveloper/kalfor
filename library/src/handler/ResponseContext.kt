@@ -8,4 +8,4 @@ data class ResponseContext(
         val method: HttpMethod,
         val key: String,
         val bufferObservable: Observable<Buffer>,
-        var body: String = "")
+        val body: String = "")

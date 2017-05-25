@@ -58,7 +58,7 @@ class CombineHandlerTest {
     fun combineHandlerShouldCombineViaPost() {
         val given = JsonArray(listOf(KalforRequest(
                 "http://localhost:$restApiMockPort",
-                listOf(KalforProxyHeader("x-foo", "bar")),
+                listOf(Kalfor2ProxyHeader("x-foo", "bar")),
                 Arrays.asList(
                         KalforProxyRequest("1firstKey", "/test"),
                         KalforProxyRequest("2secondKey", "/test2"),
@@ -85,7 +85,7 @@ class CombineHandlerTest {
     fun combineHandlerShouldCombineRedirectedViaPost() {
         val given = JsonArray(listOf(KalforRequest(
                 "http://localhost:$restApiMockPort",
-                listOf(KalforProxyHeader("x-foo", "bar")),
+                listOf(Kalfor2ProxyHeader("x-foo", "bar")),
                 Arrays.asList(
                         KalforProxyRequest("1firstKey", "/test"),
                         KalforProxyRequest("2secondKey", "/test2"),
@@ -112,7 +112,7 @@ class CombineHandlerTest {
     fun combineHandlerShouldCombineInvalidJsonViaPost() {
         val given = JsonArray(listOf(KalforRequest(
                 "http://localhost:$restApiMockPort",
-                listOf(KalforProxyHeader("x-foo", "bar")),
+                listOf(Kalfor2ProxyHeader("x-foo", "bar")),
                 Arrays.asList(
                         KalforProxyRequest("1firstKey", "/test"),
                         KalforProxyRequest("2secondKey", "/test2"),
@@ -139,14 +139,14 @@ class CombineHandlerTest {
     fun combineHandlerShouldCombineMultipleViaPost() {
         val req1 = KalforRequest(
                 "http://localhost:$restApiMockPort",
-                listOf(KalforProxyHeader("x-foo", "bar")),
+                listOf(Kalfor2ProxyHeader("x-foo", "bar")),
                 Arrays.asList(
                         KalforProxyRequest("1firstKey", "/test"),
                         KalforProxyRequest("2secondKey", "/test2")))
 
         val req2 = KalforRequest(
                 "http://localhost:$restApi2MockPort",
-                listOf(KalforProxyHeader("x-foo", "bar")),
+                listOf(Kalfor2ProxyHeader("x-foo", "bar")),
                 Arrays.asList(
                         KalforProxyRequest("3thirdKey", "/test3"),
                         KalforProxyRequest("4fourthKey", "/test4")))

@@ -23,11 +23,9 @@ import java.util.*
 val LOGGER: Logger = LoggerFactory.getLogger(CombineHandler::class.java)
 
 
-fun parseRequest(routingContext: RoutingContext, vertx: Vertx): Observable<ResponseContext> {
-    return Observable.from(parseRequestStrategy(routingContext)
-            .flatMap(executeRequest(vertx)))
-            .doOnEach(LOGGER::debug)
-            .doOnError { LOGGER.error(it.message, it) }
+fun parseRequest(routingContext: RoutingContext, vertx: Vertx): List<ResponseContext> {
+    return parseRequestStrategy(routingContext)
+            .flatMap(executeRequest(vertx))
 }
 
 fun aggregateResponse() = { last: String, ctx: ResponseContext ->
@@ -51,31 +49,30 @@ private fun aggregateJsonResponse(last: String, ctx: ResponseContext): String {
     }
 }
 
-fun convertResponse(resp: ResponseContext): Observable<ResponseContext>? {
+fun convertResponse(resp: ResponseContext): Observable<ResponseContext> {
     return when (resp.method) {
         HttpMethod.POST -> convertResponseToJson(resp)
         else -> convertResponseToPlainText(resp)
     }
 }
 
-private fun convertResponseToJson(resp: ResponseContext): Observable<ResponseContext>? {
+private fun convertResponseToJson(resp: ResponseContext): Observable<ResponseContext> {
     return resp.bufferObservable.map<ResponseContext> {
         try {
             val jsonObject = it.toJsonObject()
-            resp.body = JsonObject().put(resp.key, jsonObject).encodePrettily()
+            resp.copy(body = JsonObject().put(resp.key, jsonObject).encodePrettily())
             LOGGER.debug("converted json ${resp.body}")
         } catch (e: Exception) {
-            resp.body = it.toString(Charsets.UTF_8.name())
+            resp.copy(body = it.toString(Charsets.UTF_8.name()))
         }
         resp
     }.doOnError { convertResponseToPlainText(resp) }
 }
 
-private fun convertResponseToPlainText(resp: ResponseContext): Observable<ResponseContext>? {
+private fun convertResponseToPlainText(resp: ResponseContext): Observable<ResponseContext> {
     return resp.bufferObservable.map {
-        resp.body = it.toString(Charsets.UTF_8.name())
         LOGGER.debug("converted text ${resp.body}")
-        resp
+        resp.copy(body = it.toString(Charsets.UTF_8.name()))
     }
 }
 
@@ -105,7 +102,7 @@ private fun filterHeaders(routingContext: RoutingContext): MultiMap {
             }
 }
 
-private fun makeKalforRequest(it: String?, proxyHeaders: List<KalforProxyHeader>): KalforRequest {
+private fun makeKalforRequest(it: String?, proxyHeaders: List<Kalfor2ProxyHeader>): KalforRequest {
     val url = URI(URLDecoder.decode(it, Charsets.UTF_8.name()))
     return KalforRequest(
             "${url.scheme}://${url.host}:${url.port}",
@@ -114,7 +111,7 @@ private fun makeKalforRequest(it: String?, proxyHeaders: List<KalforProxyHeader>
             HttpMethod.GET)
 }
 
-private fun addClientRequestHeaders(it: JsonObject, proxyHeaders: List<KalforProxyHeader>): JsonObject {
+private fun addClientRequestHeaders(it: JsonObject, proxyHeaders: List<Kalfor2ProxyHeader>): JsonObject {
     it.getJsonArray("headers", JsonArray())
             .addAll(JsonArray(proxyHeaders.map {
                 JsonObject(Json.encode(it))
@@ -123,7 +120,7 @@ private fun addClientRequestHeaders(it: JsonObject, proxyHeaders: List<KalforPro
 }
 
 private fun convertMultiMapToProxyHeaders(newHeaders: MultiMap) =
-        newHeaders.names().map { KalforProxyHeader(it, newHeaders.get(it)) }
+        newHeaders.names().map { Kalfor2ProxyHeader(it, newHeaders.get(it)) }
 
 fun respondToClient(
         serverRequest: HttpServerRequest,
@@ -144,12 +141,10 @@ private fun HttpServerResponse.putHeader(header: CharSequence, value: String?) {
 private fun HttpServerRequest.getHeader(header: CharSequence): String? =
         getHeader(header.toString())
 
-fun makeHttpGetRequest(url: String, headers: List<KalforProxyHeader>?, vertx: Vertx): Observable<HttpClientResponse> {
+fun makeHttpGetRequest(url: String, headers: List<Kalfor2ProxyHeader>?, vertx: Vertx): Observable<HttpClientResponse> {
     val httpClient = getHttpClient(vertx)
     val uri = URI(url)
-    val port = if (uri.port == -1 && uri.scheme == "https") 443
-    else if (uri.port == -1 && uri.scheme == "http") 80
-    else uri.port
+    val port = getPortFromUri(uri)
     val multiMapHeaders = headers
             ?.fold(MultiMap.caseInsensitiveMultiMap(),
                     { m, h -> m.add(h.name, h.value) })
@@ -164,6 +159,12 @@ fun makeHttpGetRequest(url: String, headers: List<KalforProxyHeader>?, vertx: Ve
         resp.subscribe(subscriber)
         req.end()
     }.doOnError { LOGGER.error(it.message, it) }
+}
+
+private fun getPortFromUri(uri: URI): Int {
+    return if (uri.port == -1 && uri.scheme == "https") 443
+    else if (uri.port == -1 && uri.scheme == "http") 80
+    else uri.port
 }
 
 private fun executeRequest(vertx: Vertx): (KalforRequest) -> List<ResponseContext> {

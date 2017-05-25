@@ -11,8 +11,8 @@ class CombineHandler(private val vertx: Vertx) : Handler<RoutingContext> {
         val request = routingContext.request()
         val response = routingContext.response()
 
-        parseRequest(routingContext, vertx)
-                .map(::convertResponse)
+        Observable.from(parseRequest(routingContext, vertx)
+                .map(::convertResponse))
                 .flatMap { it }
                 .reduce("", aggregateResponse())
                 .defaultIfEmpty("")
