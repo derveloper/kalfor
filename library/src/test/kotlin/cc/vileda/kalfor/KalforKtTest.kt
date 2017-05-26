@@ -1,4 +1,4 @@
-package cc.vileda.kalfor2
+package cc.vileda.kalfor
 
 import com.github.salomonbrys.kotson.*
 import com.google.gson.Gson

@@ -1,4 +1,4 @@
-package cc.vileda.kalfor2
+package cc.vileda.kalfor
 
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.getAs

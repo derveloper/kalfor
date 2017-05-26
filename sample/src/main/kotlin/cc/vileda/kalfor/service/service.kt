@@ -1,8 +1,8 @@
 package cc.vileda.kalfor.service
 
-import cc.vileda.kalfor2.KalforRequest
-import cc.vileda.kalfor2.kalfor
-import cc.vileda.kalfor2.validateSchema
+import cc.vileda.kalfor.KalforRequest
+import cc.vileda.kalfor.kalfor
+import cc.vileda.kalfor.validateSchema
 import com.github.salomonbrys.kotson.fromJson
 import com.google.gson.Gson
 import org.jetbrains.ktor.application.call

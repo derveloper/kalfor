@@ -1,4 +1,4 @@
-package cc.vileda.kalfor2
+package cc.vileda.kalfor
 
 import com.github.fge.jackson.JsonLoader
 import com.github.fge.jsonschema.main.JsonSchemaFactory

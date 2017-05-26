@@ -1,4 +1,4 @@
-package cc.vileda.kalfor2
+package cc.vileda.kalfor
 
 data class KalforProxyRequest(
         val key: String = "",

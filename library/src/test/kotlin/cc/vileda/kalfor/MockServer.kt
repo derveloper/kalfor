@@ -1,4 +1,4 @@
-package cc.vileda.kalfor2
+package cc.vileda.kalfor
 
 import com.github.salomonbrys.kotson.jsonObject
 import org.jetbrains.ktor.application.call
