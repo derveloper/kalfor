@@ -28,7 +28,7 @@ fun mockServer(): Int {
             }
         }
     }.start()
-    Thread.sleep(2000)
+    Thread.sleep(5000)
     println("done")
 
     return port
