@@ -143,38 +143,29 @@ compile 'cc.vileda.kalfor:kalfor-library:3.2.1'
 
 ## Use it
 
-### create your verticle
+### create your http server
 
-```java
-class KalforVerticle extends AbstractVerticle
-{
-	private final int listenPort;
-	
-	KalforVerticle(final int listenPort)
-	{
-		this.listenPort = listenPort;
-	}
-
-	@Override
-	public void start() throws Exception
-	{
-		final HttpServer httpServer = vertx.createHttpServer();
-
-		final Router router = Router.router(vertx);
-		
-		// the kalfor handlers assumes that a BodyHandler is called beforehand
-		router.route().handler(BodyHandler.create());
-
-		router.post("/combine").handler(new SchemaValidationHandler());
-		router.post("/combine").handler(new CombineHandler(vertx));
-
-		httpServer.requestHandler(router::accept).listen(listenPort);
-	}
+```kotlin
+fun main(args: Array<String>) {
+    print("starting kalfor server...")
+    embeddedServer(Netty, 8080) {
+        routing {
+            post("/combine") {
+                val json = call.request.receive(String::class)
+                val resp = validateSchema(json)
+                        .fold({
+                            Gson().toJson(kalfor(Gson()
+                                    .fromJson<List<KalforRequest>>(json)))
+                        }, {
+                            it.printStackTrace()
+                            it.message!!
+                        })
+                call.respondText(resp)
+            }
+        }
+    }.start(wait = true)
 }
 ```
-
-now deploy your vert.x verticle either by using the CLI or building a fat-jar.
-see the [vertx.io docs](http://vertx.io/docs/) for that.
 
 ### combine
 ```
