@@ -1,8 +1,6 @@
 project.description = "library"
 
 dependencies {
-    compile "io.vertx:vertx-core:3.4.1"
-    compile "io.vertx:vertx-web:3.4.1"
     compile 'com.github.kittinunf.fuel:fuel:1.7.0'
     compile "com.github.fge:json-schema-validator:2.2.6"
     compile "org.funktionale:funktionale-all:1.0.1"
@@ -10,8 +8,6 @@ dependencies {
     compile "org.jetbrains.ktor:ktor-core:0.3.2"
     compile "org.jetbrains.ktor:ktor-netty:0.3.2"
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
-    testCompile "io.vertx:vertx-unit:3.4.1"
-    testCompile "io.rest-assured:rest-assured:3.0.3"
 }
 
 jar {
