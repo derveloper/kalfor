@@ -1,4 +1,4 @@
-package cc.vileda
+package cc.vileda.kalfor.service
 
 import cc.vileda.kalfor2.KalforRequest
 import cc.vileda.kalfor2.kalfor
