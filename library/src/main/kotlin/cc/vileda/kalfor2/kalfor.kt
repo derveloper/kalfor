@@ -10,12 +10,8 @@ import java.nio.charset.Charset
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
-data class KalforResponse(
-        val name: String,
-        val statusCode: Int,
-        val headers: List<KalforProxyHeader>,
-        val body: String
-)
+data class
+KalforResponse(val name: String, val statusCode: Int, val headers: List<KalforProxyHeader>, val body: String)
 
 data class KalforRequestException(
         val statusCode: Int = -1,
@@ -64,12 +60,6 @@ val httpFetcher: KalforFetcher = { (key, path), _ ->
     val (_, response, result) = path.httpGet().responseString()
     when (response.httpStatusCode) {
         in 200..300 -> {
-            Try.Success(KalforResponse(key,
-                    response.httpStatusCode,
-                    headersFrom(response.httpResponseHeaders),
-                    result.getAs() ?: ""))
-        }
-        in 300..400 -> {
             Try.Success(KalforResponse(key,
                     response.httpStatusCode,
                     headersFrom(response.httpResponseHeaders),

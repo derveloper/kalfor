@@ -5,6 +5,7 @@ import org.jetbrains.ktor.application.call
 import org.jetbrains.ktor.host.embeddedServer
 import org.jetbrains.ktor.http.ContentType
 import org.jetbrains.ktor.netty.Netty
+import org.jetbrains.ktor.response.respondRedirect
 import org.jetbrains.ktor.response.respondText
 import org.jetbrains.ktor.routing.get
 import org.jetbrains.ktor.routing.routing
@@ -21,6 +22,9 @@ fun mockServer(): Int {
         routing {
             get("/") {
                 call.respondText(jsonObject("foo" to "bar").toString(), ContentType.Application.Json)
+            }
+            get("/301") {
+                call.respondRedirect("/404", true)
             }
         }
     }.start()

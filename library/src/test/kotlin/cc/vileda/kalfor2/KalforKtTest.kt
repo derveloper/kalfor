@@ -69,6 +69,35 @@ internal class KalforKtTest {
     }
 
     @Test
+    fun kalfor_should_map_redirected_requests_with_http_fetcher() {
+        val port = mockServer()
+        val expected = listOf(
+                KalforResponse("res1", 200,
+                        listOf(KalforProxyHeader("Connection", "keep-alive"),
+                                KalforProxyHeader("Content-Length", "13"),
+                                KalforProxyHeader("Content-Type", "application/json")
+                        ),
+                        responseMock),
+                KalforResponse("res2", 404,
+                        listOf(KalforProxyHeader("Connection", "keep-alive"),
+                                KalforProxyHeader("Content-Length", "78"),
+                                KalforProxyHeader("Content-Type", "text/html; charset=UTF-8")
+                        ),
+                        "<H1>404 Not Found</H1><P>Cannot find resource with the requested URI: /404</P>")
+        )
+        val result = kalfor(listOf(
+                KalforRequest(
+                        proxyBaseUrl = "http://localhost:$port",
+                        proxyRequests = listOf(
+                                KalforProxyRequest("res1", "/"),
+                                KalforProxyRequest("res2", "/301")
+                        )
+                )
+        ))
+        assertEquals(expected, result)
+    }
+
+    @Test
     fun kalfor_should_map_error_requests_with_http_fetcher() {
         val expected = listOf(
                 KalforResponse("res1", -1,
