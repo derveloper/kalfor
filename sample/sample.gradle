@@ -15,6 +15,6 @@ jar {
                 'Built-By': System.getProperty('user.name'),
                 'Built-Date': new Date(),
                 'Built-JDK': System.getProperty('java.version'),
-                'Main-Class': 'cc.vileda.service.kalfor.KalforKt'
+                'Main-Class': 'cc.vileda.kalfor.service.KalforServiceKt'
     }
 }
