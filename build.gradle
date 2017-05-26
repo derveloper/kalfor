@@ -1,5 +1,5 @@
 group 'cc.vileda.kalfor'
-version '3.2.1'
+version '4.0.0'
 
 buildscript {
     ext.kotlinVersion = '1.1.2-3'
@@ -28,7 +28,7 @@ allprojects {
 
     ext {
         kotlinVersion = '1.1.2-3'
-        appVersion = '3.2.1'
+        appVersion = '4.0.0'
         appGroup = 'cc.vileda.kalfor'
 
 
@@ -38,7 +38,7 @@ allprojects {
 
 subprojects {
     group 'cc.vileda.kalfor'
-    version '3.2.1'
+    version '4.0.0'
 
     def pomOnlyProject = project.name == "kalfor"
 
