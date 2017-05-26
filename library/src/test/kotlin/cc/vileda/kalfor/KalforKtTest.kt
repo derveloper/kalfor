@@ -2,10 +2,10 @@ package cc.vileda.kalfor
 
 import com.github.salomonbrys.kotson.*
 import com.google.gson.Gson
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import org.funktionale.tries.Try
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
+import org.junit.Test
 
 internal class KalforKtTest {
     val responseMock = jsonObject("foo" to "bar").toString()
