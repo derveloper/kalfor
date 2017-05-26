@@ -1,8 +1,10 @@
 package cc.vileda.kalfor2
 
-import com.github.salomonbrys.kotson.jsonObject
+import com.github.salomonbrys.kotson.*
+import com.google.gson.Gson
 import org.funktionale.tries.Try
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class KalforKtTest {
@@ -62,7 +64,7 @@ internal class KalforKtTest {
                                 KalforProxyRequest("res2", "/404")
                         )
                 )
-        ), httpFetcher)
+        ))
         assertEquals(expected, result)
     }
 
@@ -80,7 +82,40 @@ internal class KalforKtTest {
                                 KalforProxyRequest("res1", "/")
                         )
                 )
-        ), httpFetcher)
+        ))
         assertEquals(expected, result)
     }
+
+    @Test
+    fun validates_valid_request() {
+        val request = listOf(
+                KalforRequest(
+                        proxyBaseUrl = "http://localhost:45874",
+                        proxyRequests = listOf(
+                                KalforProxyRequest("res1", "/")
+                        )
+                )
+        )
+        val actual = validateSchema(Gson().toJson(request))
+        assertEquals(actual, Try.Success(true))
+    }
+
+    @Test
+    fun validate_fail_on_invalid_request() {
+        val request = Gson().typedToJsonTree(listOf(
+                KalforRequest(
+                        proxyBaseUrl = "http://localhost:45874",
+                        proxyRequests = listOf(
+                                KalforProxyRequest("res1", "/")
+                        )
+                )
+        )).asJsonArray
+        request[0]["proxyBaseUrl"] = null
+        val actual = validateSchema(request.toString())
+        assertTrue(actual.isFailure())
+        assertEquals(actual.failed().get().message, "instance type (null) " +
+                "does not match any allowed primitive type " +
+                "(allowed: [\"string\"])")
+    }
 }
+

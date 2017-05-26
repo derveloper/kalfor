@@ -26,9 +26,7 @@ typealias KalforFetcher =
 (request: KalforProxyRequest, headers: List<KalforProxyHeader>) -> Try<KalforResponse>
 
 fun kalfor(requests: List<KalforRequest>): List<KalforResponse> {
-    return kalfor(requests) { (key, path), _ ->
-        Try.Success(KalforResponse(key, 200, emptyList(), path))
-    }
+    return kalfor(requests, httpFetcher)
 }
 
 fun kalfor(requests: List<KalforRequest>, fetcher: KalforFetcher): List<KalforResponse> {
