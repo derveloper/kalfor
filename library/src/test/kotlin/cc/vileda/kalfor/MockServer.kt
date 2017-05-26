@@ -13,23 +13,21 @@ import java.net.ServerSocket
 
 fun mockServer(): Int {
     print("starting mock server...")
-    val port = ServerSocket(0).let {
+    return ServerSocket(0).let {
         val port = it.localPort
         it.close()
+        embeddedServer(Netty, port) {
+            routing {
+                get("/") {
+                    call.respondText(jsonObject("foo" to "bar").toString(), ContentType.Application.Json)
+                }
+                get("/301") {
+                    call.respondRedirect("/404", true)
+                }
+            }
+        }.start()
+        Thread.sleep(10000)
+        println("done")
         port
     }
-    embeddedServer(Netty, port) {
-        routing {
-            get("/") {
-                call.respondText(jsonObject("foo" to "bar").toString(), ContentType.Application.Json)
-            }
-            get("/301") {
-                call.respondRedirect("/404", true)
-            }
-        }
-    }.start()
-    Thread.sleep(10000)
-    println("done")
-
-    return port
 }
