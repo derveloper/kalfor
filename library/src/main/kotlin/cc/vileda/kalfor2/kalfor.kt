@@ -3,8 +3,7 @@ package cc.vileda.kalfor2
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.getAs
 import com.github.salomonbrys.kotson.jsonObject
-import org.apache.commons.lang3.StringUtils
-import org.apache.commons.lang3.StringUtils.*
+import org.apache.commons.lang3.StringUtils.isNotBlank
 import org.funktionale.tries.Try
 import org.funktionale.utils.identity
 import java.nio.charset.Charset
@@ -64,7 +63,7 @@ private fun mapProxyRequestToResponse(it: KalforProxyRequest,
 }
 
 val httpFetcher: KalforFetcher = { (key, path), _ ->
-    val (request, response, result) = path.httpGet().responseString()
+    val (_, response, result) = path.httpGet().responseString()
     when (response.httpStatusCode) {
         in 200..300 -> {
             Try.Success(KalforResponse(key,

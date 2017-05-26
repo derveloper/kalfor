@@ -42,15 +42,13 @@ internal class KalforKtTest {
         val port = mockServer()
         val expected = listOf(
                 KalforResponse("res1", 200,
-                        listOf(
-                                KalforProxyHeader("Connection", "keep-alive"),
+                        listOf(KalforProxyHeader("Connection", "keep-alive"),
                                 KalforProxyHeader("Content-Length", "13"),
                                 KalforProxyHeader("Content-Type", "application/json")
                         ),
                         responseMock),
                 KalforResponse("res2", 404,
-                        listOf(
-                                KalforProxyHeader("Connection", "keep-alive"),
+                        listOf(KalforProxyHeader("Connection", "keep-alive"),
                                 KalforProxyHeader("Content-Length", "78"),
                                 KalforProxyHeader("Content-Type", "text/html; charset=UTF-8")
                         ),
@@ -62,6 +60,24 @@ internal class KalforKtTest {
                         proxyRequests = listOf(
                                 KalforProxyRequest("res1", "/"),
                                 KalforProxyRequest("res2", "/404")
+                        )
+                )
+        ), httpFetcher)
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun kalfor_should_map_error_requests_with_http_fetcher() {
+        val expected = listOf(
+                KalforResponse("res1", -1,
+                        emptyList(),
+                        jsonObject("error" to "Connection refused (Connection refused)").toString())
+        )
+        val result = kalfor(listOf(
+                KalforRequest(
+                        proxyBaseUrl = "http://localhost:45874",
+                        proxyRequests = listOf(
+                                KalforProxyRequest("res1", "/")
                         )
                 )
         ), httpFetcher)
