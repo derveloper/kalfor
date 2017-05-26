@@ -99,11 +99,6 @@ internal class KalforKtTest {
 
     @Test
     fun kalfor_should_map_error_requests_with_http_fetcher() {
-        val expected = listOf(
-                KalforResponse("res1", -1,
-                        emptyList(),
-                        jsonObject("error" to "Connection refused (Connection refused)").toString())
-        )
         val result = kalfor(listOf(
                 KalforRequest(
                         proxyBaseUrl = "http://localhost:45874",
@@ -112,7 +107,8 @@ internal class KalforKtTest {
                         )
                 )
         ))
-        assertEquals(expected, result)
+        assertEquals(result.size, 1)
+        assertTrue(result[0].body.contains("Connection refused"))
     }
 
     @Test
