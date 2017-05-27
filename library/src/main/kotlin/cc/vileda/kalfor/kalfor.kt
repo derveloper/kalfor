@@ -21,11 +21,17 @@ data class KalforRequestException(
 typealias KalforFetcher =
 (request: KalforProxyRequest, headers: List<KalforProxyHeader>) -> Try<KalforResponse>
 
-fun kalfor(requests: List<KalforRequest>): List<KalforResponse> {
-    return kalfor(requests, httpFetcher)
+fun kalforPost(requests: List<KalforRequest>): List<KalforResponse> {
+    return kalforPost(requests, httpFetcher)
 }
 
-fun kalfor(requests: List<KalforRequest>, fetcher: KalforFetcher): List<KalforResponse> {
+fun kalforGet(requests: List<KalforRequest>): String {
+    return kalforPost(requests, httpFetcher)
+            .map { it.body }
+            .joinToString("\n")
+}
+
+fun kalforPost(requests: List<KalforRequest>, fetcher: KalforFetcher): List<KalforResponse> {
     return requests.parallelStream()
             .flatMap { mapRequestToResponses(it, fetcher) }
             .collect(Collectors.toList())

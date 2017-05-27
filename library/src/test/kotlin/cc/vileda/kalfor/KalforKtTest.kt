@@ -26,7 +26,7 @@ internal class KalforKtTest {
                 KalforResponse("sipgateTranslations", 200, headers, responseMock),
                 KalforResponse("error", 500, emptyList(), failedResponseMock)
         )
-        val result = kalfor(listOf(
+        val result = kalforPost(listOf(
                 KalforRequest(
                         proxyBaseUrl = "https://api.sipgate.com",
                         proxyRequests = listOf(
@@ -43,20 +43,10 @@ internal class KalforKtTest {
     fun kalfor_should_map_requests_with_http_fetcher() {
         val port = mockServer()
         val expected = listOf(
-                KalforResponse("res1", 200,
-                        listOf(KalforProxyHeader("Connection", "keep-alive"),
-                                KalforProxyHeader("Content-Length", "13"),
-                                KalforProxyHeader("Content-Type", "application/json")
-                        ),
-                        responseMock),
-                KalforResponse("res2", 404,
-                        listOf(KalforProxyHeader("Connection", "keep-alive"),
-                                KalforProxyHeader("Content-Length", "78"),
-                                KalforProxyHeader("Content-Type", "text/html; charset=UTF-8")
-                        ),
-                        "<H1>404 Not Found</H1><P>Cannot find resource with the requested URI: /404</P>")
+                responseMock1(),
+                response404Mock()
         )
-        val result = kalfor(listOf(
+        val result = kalforPost(listOf(
                 KalforRequest(
                         proxyBaseUrl = "http://localhost:$port",
                         proxyRequests = listOf(
@@ -69,23 +59,29 @@ internal class KalforKtTest {
     }
 
     @Test
+    fun kalfor_should_map_get_requests_with_http_fetcher() {
+        val port = mockServer()
+        val expected = "test-1\ntest-2"
+        val result = kalforGet(listOf(
+                KalforRequest(
+                        proxyBaseUrl = "http://localhost:$port",
+                        proxyRequests = listOf(
+                                KalforProxyRequest("res-text", "/res-text"),
+                                KalforProxyRequest("res-text2", "/res-text2")
+                        )
+                )
+        ))
+        assertEquals(expected, result)
+    }
+
+    @Test
     fun kalfor_should_map_redirected_requests_with_http_fetcher() {
         val port = mockServer()
         val expected = listOf(
-                KalforResponse("res1", 200,
-                        listOf(KalforProxyHeader("Connection", "keep-alive"),
-                                KalforProxyHeader("Content-Length", "13"),
-                                KalforProxyHeader("Content-Type", "application/json")
-                        ),
-                        responseMock),
-                KalforResponse("res2", 404,
-                        listOf(KalforProxyHeader("Connection", "keep-alive"),
-                                KalforProxyHeader("Content-Length", "78"),
-                                KalforProxyHeader("Content-Type", "text/html; charset=UTF-8")
-                        ),
-                        "<H1>404 Not Found</H1><P>Cannot find resource with the requested URI: /404</P>")
+                responseMock1(),
+                response404Mock()
         )
-        val result = kalfor(listOf(
+        val result = kalforPost(listOf(
                 KalforRequest(
                         proxyBaseUrl = "http://localhost:$port",
                         proxyRequests = listOf(
@@ -99,7 +95,7 @@ internal class KalforKtTest {
 
     @Test
     fun kalfor_should_map_error_requests_with_http_fetcher() {
-        val result = kalfor(listOf(
+        val result = kalforPost(listOf(
                 KalforRequest(
                         proxyBaseUrl = "http://localhost:45874",
                         proxyRequests = listOf(
@@ -141,6 +137,24 @@ internal class KalforKtTest {
         assertEquals(actual.failed().get().message, "instance type (null) " +
                 "does not match any allowed primitive type " +
                 "(allowed: [\"string\"])")
+    }
+
+    private fun response404Mock(): KalforResponse {
+        return KalforResponse("res2", 404,
+                listOf(KalforProxyHeader("Connection", "keep-alive"),
+                        KalforProxyHeader("Content-Length", "78"),
+                        KalforProxyHeader("Content-Type", "text/html; charset=UTF-8")
+                ),
+                "<H1>404 Not Found</H1><P>Cannot find resource with the requested URI: /404</P>")
+    }
+
+    private fun responseMock1(): KalforResponse {
+        return KalforResponse("res1", 200,
+                listOf(KalforProxyHeader("Connection", "keep-alive"),
+                        KalforProxyHeader("Content-Length", "13"),
+                        KalforProxyHeader("Content-Type", "application/json")
+                ),
+                responseMock)
     }
 }
 

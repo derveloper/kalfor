@@ -1,5 +1,6 @@
 package cc.vileda.kalfor
 
+import cc.vileda.kalfor.service.kalforService
 import com.github.salomonbrys.kotson.jsonObject
 import org.jetbrains.ktor.application.call
 import org.jetbrains.ktor.host.embeddedServer
@@ -11,7 +12,19 @@ import org.jetbrains.ktor.routing.get
 import org.jetbrains.ktor.routing.routing
 import java.net.ServerSocket
 
-fun mockServer(): Int {
+fun mockKalforService(): Int {
+    print("starting mock server...")
+    return ServerSocket(0).let {
+        val port = it.localPort
+        it.close()
+        kalforService(false, port)
+        Thread.sleep(1000)
+        println("done")
+        port
+    }
+}
+
+fun mockServer2(): Int {
     print("starting mock server...")
     return ServerSocket(0).let {
         val port = it.localPort

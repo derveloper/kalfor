@@ -184,4 +184,3 @@ gradle-app.setting
 
 gradle.properties
 /classes/
-!/library/src/main/kotlin/cc/vileda/kalfor/handler/CombineHandlerUtils.kt
