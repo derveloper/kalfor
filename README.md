@@ -1,39 +1,39 @@
-# kalforPost
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/cc.vileda.kalforPost/kalforPost-library/badge.svg)](https://maven-badges.herokuapp.com/maven-central/cc.vileda.kalforPost/kalforPost-library)
-[![Build Status](https://travis-ci.org/derveloper/kalforPost.svg?branch=master)](https://travis-ci.org/derveloper/kalforPost)
-[![](https://tokei.rs/b1/github/derveloper/kalforPost)](https://github.com/Aaronepower/tokei)
-[![codecov](https://codecov.io/gh/derveloper/kalforPost/branch/master/graph/badge.svg)](https://codecov.io/gh/derveloper/kalforPost)
+# kalfor
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/cc.vileda.kalfor/kalfor-library/badge.svg)](https://maven-badges.herokuapp.com/maven-central/cc.vileda.kalfor/kalfor-library)
+[![Build Status](https://travis-ci.org/derveloper/kalfor.svg?branch=master)](https://travis-ci.org/derveloper/kalfor)
+[![](https://tokei.rs/b1/github/derveloper/kalfor)](https://github.com/Aaronepower/tokei)
+[![codecov](https://codecov.io/gh/derveloper/kalfor/branch/master/graph/badge.svg)](https://codecov.io/gh/derveloper/kalfor)
 [![Dependency Status](https://www.versioneye.com/user/projects/591f41b98dcc41003af21ec7/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/591f41b98dcc41003af21ec7)
 [![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/vert-x3/vertx-awesome#microservices)
 
-kalforPost is a HTTP multiplexer microservice
+kalfor is a HTTP multiplexer microservice
 
 ## what?
-kalforPost transforms a single HTTP `POST` request to multiple parallel HTTP `GET` requests to a given HTTP backend
+kalfor transforms a single HTTP `POST` request to multiple parallel HTTP `GET` requests to a given HTTP backend
 which then are combined and send back to the client in a single JSON response.
 
 ## why
 while developing frontends for REST APIs you'll face performance problems because you have to make too many requests.
-with kalforPost you can combine all your REST Calls into a single `POST` request.
-kalforPost will fetch each endpoint in parallel for you and and respond all API responses in a single JSON to you.
+with kalfor you can combine all your REST Calls into a single `POST` request.
+kalfor will fetch each endpoint in parallel for you and and respond all API responses in a single JSON to you.
 
 ## demo instance
 
-You can find the demo instance at https://kalforPost.app.vileda.cc/combine
+You can find the demo instance at https://kalfor.app.vileda.cc/combine
 
 ### try it yourself
 ```
 $ curl -H'Content-Type: application/json' \
 --data '[{"proxyBaseUrl":"https://api.github.com", "proxyRequests":[{"path":"/", "key":"github"}]},'\
 '{"proxyBaseUrl":"https://api.spotify.com", "proxyRequests":[{"path":"/v1", "key":"spotify"}]}]' \
-'https://kalforPost.app.vileda.cc/combine'
+'https://kalfor.app.vileda.cc/combine'
 ```
 
 ## api
 
 ### request schema
 
-The schema for a kalforPost request
+The schema for a kalfor request
 ```javascript
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
@@ -123,12 +123,12 @@ A request with all current features
 
 ### maven
 
-#### Add kalforPost dependency
+#### Add kalfor dependency
 ```xml
 <dependencies>
     <dependency>
-        <groupId>cc.vileda.kalforPost</groupId>
-        <artifactId>kalforPost-library</artifactId>
+        <groupId>cc.vileda.kalfor</groupId>
+        <artifactId>kalfor-library</artifactId>
         <version>4.0.0</version>
     </dependency>
 </dependencies>
@@ -136,9 +136,9 @@ A request with all current features
 
 ### gradle
 
-#### Add kalforPost dependency
+#### Add kalfor dependency
 ```groovy
-compile 'cc.vileda.kalforPost:kalforPost-library:4.0.0'
+compile 'cc.vileda.kalfor:kalfor-library:4.0.0'
 ```
 
 ## Use it
@@ -147,7 +147,7 @@ compile 'cc.vileda.kalforPost:kalforPost-library:4.0.0'
 
 ```kotlin
 fun main(args: Array<String>) {
-    print("starting kalforPost server...")
+    print("starting kalfor server...")
     embeddedServer(Netty, 8080) {
         routing {
             post("/combine") {
@@ -186,7 +186,7 @@ $ curl -H'Content-Type: application/json' \
 ```
 
 #### headers
-kalforPost is able to send specific headers to each backend. Just provide a list of headers in your request JSON
+kalfor is able to send specific headers to each backend. Just provide a list of headers in your request JSON
 
 ```
 $ curl -H'Content-Type: application/json' \
