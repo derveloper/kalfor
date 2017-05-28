@@ -27,7 +27,6 @@ fun kalforService(wait: Boolean, port: Int) {
                             Gson().toJson(kalforPost(Gson()
                                     .fromJson<List<KalforRequest>>(json)))
                         }, {
-                            it.printStackTrace()
                             it.message!!
                         })
                 call.respondText(resp)

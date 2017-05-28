@@ -4,7 +4,10 @@ import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.jsonObject
+import com.github.salomonbrys.kotson.set
+import com.github.salomonbrys.kotson.typedToJsonTree
 import com.google.gson.Gson
+import junit.framework.TestCase
 import org.junit.Test
 import java.nio.charset.Charset
 import kotlin.test.assertTrue
@@ -43,13 +46,37 @@ internal class KalforIT {
                         )
                 )
         ))
-        val request = ("http://localhost:$mockKalforPort/combine?c=" +
-                "http://localhost:$mockServerPort/res-text").httpPost()
+        val request = ("http://localhost:$mockKalforPort/combine").httpPost()
         request.request.body(body, Charset.defaultCharset())
         val result = Gson().fromJson<List<KalforResponse>>(request.response().third.get()
                 .toString(Charset.defaultCharset()))
 
         assertTrue(expected == result)
+    }
+
+    @Test
+    fun validate_fail_on_invalid_request() {
+        val mockKalforPort = mockKalforService()
+
+        val body = Gson().typedToJsonTree(listOf(
+                KalforRequest(
+                        proxyBaseUrl = "http://localhost:45874",
+                        proxyRequests = listOf(
+                                KalforProxyRequest("res1", "/")
+                        )
+                )
+        )).asJsonArray
+        body[0]["proxyBaseUrl"] = null
+
+        val request = ("http://localhost:$mockKalforPort/combine").httpPost()
+        request.request.body(body.toString(), Charset.defaultCharset())
+
+        val result = request.response().third.get()
+                .toString(Charset.defaultCharset())
+
+        TestCase.assertEquals(result, "instance type (null) " +
+                "does not match any allowed primitive type " +
+                "(allowed: [\"string\"])")
     }
 
     val responseMock = jsonObject("foo" to "bar").toString()
